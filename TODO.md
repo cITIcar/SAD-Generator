@@ -1,0 +1,6 @@
+- reimplement drunk driving
+- the horizon (0.45) should be calculated
+- reimplement brightness variations
+- obstacles still sometimes render behind
+- config for adding render objects
+- seperate augmentation and implement "generate_augmented"
