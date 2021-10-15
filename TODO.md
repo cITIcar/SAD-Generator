@@ -4,3 +4,4 @@
 - obstacles still sometimes render behind
 - config for adding render objects
 - seperate augmentation and implement "generate_augmented"
+- README.md
