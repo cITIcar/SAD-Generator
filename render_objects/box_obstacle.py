@@ -1,6 +1,7 @@
 import random
 import numpy as np
 import cv2
+import time
 
 from . import render_object
 from render import Renderer
@@ -12,6 +13,9 @@ class BoxObstacle(render_object.RenderObject):
         self.colors = colors
         self.segment_color = config["obstacle_class"]
         self.rescale = config["rescale"] if config else 1
+        self.blur = config["output_size"][0] // 50
+        if self.blur % 2 == 0:
+            self.blur += 1
 
 
     def pre_transform_step(self, **kwargs):
@@ -37,7 +41,6 @@ class BoxObstacle(render_object.RenderObject):
         reflection = self.create_reflection(image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer)
         image += cv2.resize(reflection, image.shape[::-1])
         self.create_obstacle(image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer)
-
 
     def create_reflection(self, image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer):
         empty = np.zeros(image_segment.shape)
@@ -81,14 +84,14 @@ class BoxObstacle(render_object.RenderObject):
                 points[6]])]
 
         surfaces.sort(key=lambda surface: -np.linalg.norm(np.average(surface, axis=0) - np.array([*point, 0])))
- 
+
         for surface, color in zip(surfaces, self.colors):
             points_2d = np.array(list(map(
                 lambda p: renderer.project_point(p),
                 surface)))
 
             cv2.fillPoly(empty, [(points_2d / self.rescale).astype(int)], int(color / 1.5))
-            empty = cv2.blur(empty, (11, 11))
+            empty = cv2.blur(empty, (self.blur, self.blur))
 
         return empty
 
@@ -133,7 +136,7 @@ class BoxObstacle(render_object.RenderObject):
                 points[6]])]
 
         surfaces.sort(key=lambda surface: -np.linalg.norm(np.average(surface, axis=0) - np.array([*point, 0])))
- 
+
         for surface, color in zip(surfaces, self.colors):
             points_2d = np.array(list(map(
                 lambda p: renderer.project_point(p),
