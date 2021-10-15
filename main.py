@@ -50,7 +50,7 @@ def generate_synthetic(config, splitname, output_idcs):
             if config["debug"]:
                 cv2.imshow(f"nice {splitname}", perspective_nice)
                 cv2.imshow(f"segment {splitname}", perspective_segment)
-                cv2.waitKey(0)
+                cv2.waitKey(1)
             else:
                 cv2.imwrite(images_base_path + "/" + image_pattern.format(idx=output_idcs[idx]), perspective_nice)
                 cv2.imwrite(annotations_base_path + "/" + image_pattern.format(idx=output_idcs[idx]), perspective_segment)
@@ -101,7 +101,7 @@ if __name__ == "__main__":
         random.shuffle(idcs_test)
 
     generate_synthetic(
-        config, 
+        config,
         "train_split",
         idcs_train[int(
             config["splits"]["train_split"]["fraction_synthetic"] *
@@ -109,13 +109,13 @@ if __name__ == "__main__":
     generate_synthetic(
         config,
         "validation_split",
-        idcs_train[int(
+        idcs_validation[int(
             config["splits"]["validation_split"]["fraction_synthetic"] *
             config["splits"]["validation_split"]["size"]):])
     generate_synthetic(
         config,
         "test_split",
-        idcs_train[int(
+        idcs_test[int(
             config["splits"]["test_split"]["fraction_synthetic"] *
             config["splits"]["test_split"]["size"]):])
 
