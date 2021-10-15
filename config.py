@@ -1,108 +1,47 @@
-from imports import *
+import numpy as np
+import math
+import json
 
 class Config:
-    """
-    Dieses Dokument enthält alle Zahlen.
-    Im weiteren Code sollen keine magic Numbers vorkommen.
-    Jeder Parameter, jede Kalibration wird hier definiert.
-    """
+    def __init__(self, config_file, debug=False):
+        self.config = json.load(open(config_file))
 
-    
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' # Zeige in der Konsole nur Errormeldungen
-    
-    px_cm_ratio =  4                    # Maßstab  4 pixel = 1 cm          
-    size_image_cm = 250                 # Seitenlänge des chunk-Quadrats
-    line_nice_width_cm = 2              # Linenbreite der Fahrbahnränder
-    center_distance_cm = 20             # rechter Abstand zur Mittellinie
-    line_segmentated_width_cm = 4       # Breite der Fahrbahnränder im segmentierten Bild
-    street_width_cm = 40                # Breite einer Fahrbahn
-    drive_period_cm = 24                # Periodendauer der Fahrtpunkte
-    dot_period_cm = 40                  # Periodendauer der gestrichelten Mittellinie
-    box_offset = 40                     # Offset für Objektlabel Intersection
-    dot_length_cm = 20                  # Pulsweite der gestrichelten Mittellinie
+        self.config["intrinsic_camera_matrix"] = Config.create_intrinsic_from(
+            self.config["fov"], 
+            [self.config["output_size"][0] * self.config["rescale"],
+             self.config["output_size"][1] * self.config["rescale"]])
 
-    file_list = ["line", "line", "line", "line"]    # Initialisiere die Strecke mit vier chunks
-    degree_list = [0,0,0,0]
-    disorder_list = [0,0,0,0]
+        self.config["intrinsic_segmentation_matrix"] = Config.create_intrinsic_from(
+            self.config["fov"],
+            self.config["output_size"])
 
-    h_size_cm = 500                     # Größe des ROIs
-    v_size_cm = 500 
-    
-    input_size_px = 128                 # Input Größe des neuronalen Netzes
-    camera_resolution = (640,480)       # Auflösung der Fahrzeugkamera
-    interrupted_lines = False           # Haben die Fahrbahnmarkierungen Lücken?
-    magnitude = 50                      # Stärke der Störung auf dem Bild [0, 1]
+        self.config["project2d"] = Config.create_project2d()
 
-    # Kameraparameter für die Perspektiventransformation
-    camera_perspective = np.float32([[163.0, 289.0], [240.5, 250.5], [398.5, 250.6], [474.7, 289.6]])                                   
-    bird_perspective = np.float32([[300 + 500, 1400.0 + 200], [300 + 500, 1000.0 + 200], [700 + 500, 1000.0 + 200], [700 + 500, 1400.0 + 200]])
-    pre_transform_matrix = cv.getPerspectiveTransform(bird_perspective, camera_perspective)    # Vorwärts Transformationsmatrix   
-    post_transform_matrix = cv.getPerspectiveTransform(camera_perspective, bird_perspective)    
+        self.config["px_per_cm"] = self.config["chunk_size_px"] / self.config["chunk_size_cm"]
+        self.config["camera_height_px"] = self.config["camera_height"] * self.config["px_per_cm"]
+        self.config["debug"] = debug
 
 
-
-    # Notwendige Umrechnungen der Einheiten
-    size_image_px = int(size_image_cm * px_cm_ratio)
-    line_nice_width_px = int(line_nice_width_cm * px_cm_ratio)
-    center_distance_px = int(center_distance_cm * px_cm_ratio)
-    line_segmentated_width_px = int(line_segmentated_width_cm * px_cm_ratio)
-    street_width_px = int(street_width_cm * px_cm_ratio)
-    drive_period_px = int(drive_period_cm * px_cm_ratio)
-    dot_period_px = int(dot_period_cm * px_cm_ratio)
-    dot_length_px = int(dot_length_cm * px_cm_ratio)    
-    h_size_px = int(h_size_cm * px_cm_ratio) 
-    v_size_px = int(v_size_cm * px_cm_ratio) 
+    def __getitem__(self, key):
+        return self.config[key]
 
 
-    # Der Pfad der Log-Dateien
-    ld='logs/training_results/train'
-    # Ip und Port für Tensorboard
-    h="127.0.0.1"
-    p="6010" 
+    def create_intrinsic_from(fov, output_size):
+        output_width, output_height = output_size
+        focal_length = math.tan(fov / 180 * np.pi / 2) * output_width / 2
+
+        print(f"focal_length {focal_length}")
+
+        return np.float32([
+            [-focal_length, 0, output_width / 2, 0],
+            [0, -focal_length, output_height / 2, 0],
+            [0, 0, 1, 0]])
 
 
-    # Parameter für das neuronale Netzwerk
-    
-    # Menge der Daten
-    TRAINSET_SIZE = 100 # len(glob(train_path + "*.jpg"))
-    VALSET_SIZE = 1000 # len(glob(val_path + "*.jpg"))
-    # Anzahl Stichproben pro Batch
-    BATCH_SIZE = 32
-    # Datenformat der etikettierten Stichproben
-    image_format = "*.jpg"
-    amount_test_samples = 5
-    
-    STEPS_PER_EPOCH = TRAINSET_SIZE // BATCH_SIZE
-    VALIDATION_STEPS = VALSET_SIZE // BATCH_SIZE
-    output_shapes = ([int(input_size_px/2), input_size_px, 1], [int(input_size_px/2), input_size_px, 1])
-    # Anzahl der Farbkanäle
-    N_CHANNELS = 1
-    # Anzahl zu segmentierender Klassen
-    N_CLASSES = 5
-    # Zufälliger Schlüssel zum Mischen des Datensatzes
-    SEED = 42
+    def create_project2d():
+        return np.float32([
+            [-1, 0, 0],
+            [0, -1, 0],
+            [0, 0, 0],
+            [0, 0, 1]])
 
-    # 
-    BUFFER_SIZE = 100
-    # Anzahl Epochen
-    EPOCHS = 500
-    # Pfade für etikettierte Stichproben
-    train_path = "data/images/trainset/synthetic_set/"
-    val_path = "data/images/valset/*/"
-    
-    # Wurde das Netzwerk bereits vortrainiert
-    pretrain = False
-
-    # Lade die Architektur und Parameter des Netzwerks.
-    with open('./model.json', 'r') as json_file:
-        loaded_model_json = json_file.read()
-
-    model = model_from_json(loaded_model_json)
-    model.load_weights('./parameters.h5')
-    model.compile()
-    
-    # Überdeckung des Fahrzeuges in der Fahrzeugkamera
-    points = np.array([[int(input_size_px*0.65), int(input_size_px*0.5*0.65)], 
-                    [int(input_size_px*0.35), int(input_size_px*0.5*0.65)],
-                    [int(input_size_px*0.25), int(input_size_px*0.5)], 
-                    [int(input_size_px*0.75), int(input_size_px*0.5)]])

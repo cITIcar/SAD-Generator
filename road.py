@@ -1,4 +1,9 @@
-from imports import *
+import cv2 as cv
+import numpy as np
+import json 
+import random
+import time
+import glob
 
 class Road:
     """
@@ -6,14 +11,54 @@ class Road:
 
     """
 
-    def __init__(self):
+    def __init__(self, config):
+        self.file_list = ["line", "line", "intersection", "line"]
+        self.degree_list = [ 0, 0, 0, 0 ]
+        self.size_image_px = 1000
+        self.config = config
+        self.load_images()
 
-        self.file_list = Config.file_list        
-        self.degree_list = Config.degree_list
-        self.disorder_list = Config.disorder_list
-        self.size_image_px = Config.size_image_px 
-        
-        
+
+    def load_images(self):
+        """
+        Lädt alle Segment Typen ein und speichert sie in allen möglichen Rotationen
+        """
+        self.images = {}
+        self.chunk_json = {}
+
+        for segment_type in [ "line", "intersection", "curve_left", "curve_right" ]:
+            segment = cv.imread(f"chunks/{segment_type}_segment.png", cv.IMREAD_GRAYSCALE)
+            self.images[segment_type] = {
+                "nice": [],
+                "segment": {
+                    0: segment,
+                    90: cv.rotate(segment, cv.ROTATE_90_COUNTERCLOCKWISE),
+                    -180: cv.rotate(segment, cv.ROTATE_180),
+                    180: cv.rotate(segment, cv.ROTATE_180),
+                    -90: cv.rotate(segment, cv.ROTATE_90_CLOCKWISE),
+                }
+            }
+
+            with open(f"chunks/{segment_type}.json") as f:
+                self.chunk_json[segment_type] = json.load(f)
+
+            path_pattern = (
+                self.config["paths"]["chunk_path"] + "/" + 
+                self.config["paths"]["chunk_file_pattern"]
+            ).format(chunk_type=segment_type + "_nice", variant="*")
+
+            for variant in glob.glob(path_pattern):
+                nice = cv.imread(variant, cv.IMREAD_GRAYSCALE)
+                
+                self.images[segment_type]["nice"].append({
+                    0: nice,
+                    90: cv.rotate(nice, cv.ROTATE_90_COUNTERCLOCKWISE),
+                    -180: cv.rotate(nice, cv.ROTATE_180),
+                    180: cv.rotate(nice, cv.ROTATE_180),
+                    -90: cv.rotate(nice, cv.ROTATE_90_CLOCKWISE),
+                })
+
+
     def get_position(self):
         """
         Schritt 1
@@ -108,7 +153,6 @@ class Road:
         # Entferne erstes Element aus list, durch welches das Auto schon durchgefahren ist
         self.file_list.pop(0)
         self.degree_list.pop(0)
-        self.disorder_list.pop(0)
 
         # Nehme die Position des aktuellen (vorletzten hinzugefügten) chunks. Nicht den neusten chunk
         (m, n) = position_list[len(position_list)-1]
@@ -167,19 +211,20 @@ class Road:
             # Prüfe ob das Element relativ links schon belegt ist. Falls nein, füge curve_left hinzu
             if not (m+1, n) in position_list:
                 elements.append("curve_left")
-
-        #elements = ["line", "intersection"]  # zum Debuggen
+                
+        # Zum debuggen
+        #elements = ["line", "intersection"]
+        # Zum debuggen
 
         # Wähle ein zufälliges Element aus den erlaubten Streckenelementen
         [file] = np.random.choice(elements, 1)  #, p=probability
         self.file_list.append(file)
 
         # Wähle ein zufälliges gestörtes Bild
-        self.disorder_list.append(random.randint(0,9))
 
         # Bestimme den Winkel des neuen chunks (erst für die nächste Iteration von Bedeutung) und hefte es hinten an.
         with open(f"chunks/{file}.json", 'r') as openfile: 
-            json_object = json.load(openfile) 
+            json_object = json.load(openfile)
         degree = json_object['degree']
         self.degree_list.append(degree)
 
@@ -210,7 +255,6 @@ class Road:
         return coords_list
 
 
-
     def get_drive_points(self, center_shift_vertikal, center_shift_horizontal):
         """
         Schritt 5
@@ -225,16 +269,17 @@ class Road:
 
         file = self.file_list[0]
         # Bestimme den Winkel des neuen chunks (erst für die nächste Iteration von Bedeutung) und hefte es hinten an.
-        with open(f"chunks/{file}.json", 'r') as openfile: 
-            json_object = json.load(openfile) 
-        drive_points = json_object['drive_points']
+        json_def = self.chunk_json[self.file_list[0]]
+        drive_points = json_def['drive_points']
 
         for x in drive_points:
-            h_coord = x[1] - self.size_image_px/2 + center_shift_horizontal
-            v_coord = x[0] - self.size_image_px/2 + center_shift_vertikal
+            h_coord = x[0] - self.size_image_px/2 + center_shift_horizontal
+            v_coord = x[1] - self.size_image_px/2 + center_shift_vertikal
             drive_point_coords_list.append([int(h_coord), int(v_coord)])
 
-        return drive_point_coords_list
+        angles = np.linspace(0, json_def["degree"] / 180  * np.pi, len(drive_points))
+
+        return drive_point_coords_list, angles
 
 
     def insert_chunk(self, coords_list, total_degree_list, size_image_vertikal, size_image_horizontal, interrupted_lines):
@@ -250,40 +295,30 @@ class Road:
         Output: full_image_nice(Gesamtbild der Straße - der Realität nachgeahmt), full_image_segment(Gesamtbild der Straße - segmentiert)
         """
         # Generiere neues Vollbild
-        full_image_nice  = np.zeros((size_image_vertikal, size_image_horizontal))
-        full_image_segment = np.zeros((size_image_vertikal, size_image_horizontal, 4))
-
+        full_image_nice  = np.zeros((size_image_vertikal, size_image_horizontal), dtype=np.uint8)
+        full_image_segment = np.zeros((size_image_vertikal, size_image_horizontal))
 
         # Iteriere über alle chunks
-        for i in range(0, len(self.file_list)):
-
-            # Lese aktuellen chunk Namen
-            file = self.file_list[i]
-
-            # Soll die Fahrbahnmarkierung lückenhaft sein?
-            if True:
-                # Berücksichtige bei der Wahl gestörte Bilder
-                number = self.disorder_list[i]
-
+        for i, file in enumerate(self.file_list):
             # Importiere die chunk-Bilder und das JSON-file
-            img_nice = cv.imread(f"chunks/{file}_nice_{number}.jpg", cv.IMREAD_GRAYSCALE)                        
-            img_segment = cv.imread(f"chunks/{file}_segment.png", cv.IMREAD_UNCHANGED)        
-        
             # Lese des Gesamtwinkel aller vorherigen chunks
             angle = - total_degree_list[i] if i > 0 else 0
 
-            # Drehe die chunk-Bilder um diesen Winkel
-            rot_mat = cv.getRotationMatrix2D((self.size_image_px/2, self.size_image_px/2), angle, 1.0)
-            img_nice = cv.warpAffine(img_nice, rot_mat, (self.size_image_px, self.size_image_px))
-            img_segment = cv.warpAffine(img_segment, rot_mat, (self.size_image_px, self.size_image_px))
+            
+            if file == "intersection" and bool(random.getrandbits(1)):
+                # Wichtig: Falls die Haltelinie nicht im Weg ist, muss das segmentierte Bild der Gerade verwendet werden.
+                img_nice = random.choice(self.images[file]["nice"])[int(angle + 90) if angle < 180 else int(angle - 90)]
+                img_segment = self.images["line"]["segment"][angle]
+            else:
+                img_nice = random.choice(self.images[file]["nice"])[angle]
+                img_segment = self.images[file]["segment"][angle]        
 
             # Jeder chunk wird entsprechend dem Winkel und der Position seiner Vorgänger platziert
             [v_1, v_2, h_1, h_2] = coords_list[i]
 
-            for i in range(0,3):
-                # Setze chunk-Bild in Vollbild ein
-                full_image_nice[v_1:v_2, h_1:h_2] = img_nice
-                full_image_segment[v_1:v_2, h_1:h_2] = img_segment
+            # Setze chunk-Bild in Vollbild ein
+            full_image_nice[v_1:v_2, h_1:h_2] = img_nice
+            full_image_segment[v_1:v_2, h_1:h_2] = img_segment
 
         return full_image_nice, full_image_segment
 
@@ -316,15 +351,15 @@ class Road:
         Output: Zwei Gesamtbilder der Straße (segmentiert und schön), die Koordinaten der Fahrttrajektorie
         """
         
-        position_list, total_degree_list = Road.get_position(self)
-        size_image_vertikal, size_image_horizontal, center_shift_vertikal, center_shift_horizontal = Road.transform_mn2hv(self, position_list)
-        Road.select_chunk(self, position_list, total_degree_list)
-        coords_list = Road.mn2coords(self, position_list, center_shift_vertikal, center_shift_horizontal)
-        drive_point_coords_list = Road.get_drive_points(self, center_shift_vertikal, center_shift_horizontal)     
-        interruption = cv.getTrackbarPos("interruption", "control")
-        full_image_nice, full_image_segment = Road.insert_chunk(self, coords_list, total_degree_list, size_image_vertikal, size_image_horizontal, interruption)
+        position_list, total_degree_list = self.get_position()
+        size_image_vertikal, size_image_horizontal, center_shift_vertikal, center_shift_horizontal = self.transform_mn2hv(position_list)
+        self.select_chunk(position_list, total_degree_list)
+        coords_list = self.mn2coords(position_list, center_shift_vertikal, center_shift_horizontal)
+        drive_point_coords_list, angles = self.get_drive_points(center_shift_vertikal, center_shift_horizontal)     
+        full_image_nice, full_image_segment = self.insert_chunk(coords_list, total_degree_list, size_image_vertikal, size_image_horizontal, 0)
 
-        return full_image_nice, full_image_segment, drive_point_coords_list, coords_list
+        return full_image_nice, full_image_segment, drive_point_coords_list, coords_list, angles
+
 
 
 

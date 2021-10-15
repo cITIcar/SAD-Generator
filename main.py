@@ -1,126 +1,121 @@
-from imports import *
+#!/usr/bin/env python3
 
-"""
+import os
+import time
+import random
+import argparse
+import numpy as np
+import cv2
 
-xavier tensor units fp16 Beachten!
+from config import Config
+import road
+import render
+from render_objects import BoxObstacle, Dust
 
-Read Me Schreiben
-
-"""
-
-
-road = Road()
-visualization = Visualization()
-
-
-def main(args):
-    """
-    Wähle ein Programm:
-    - show_generator:           Datengenerator visualisieren
-    - train:                    Training des Netzes
-    - test:                     Ist- und Sollzustand der Inferenz prüfen
-    - debug:                    Kompilieren der Tensorboard-Visualisierung
-    - create_elements:          Erzeugung der Straßenelemente
-    
-    """
-
-    print(args.program)  
-    commands[args.program]()
+parser = argparse.ArgumentParser(description="generate training data")
+parser.add_argument(
+    "--config", metavar="config file", type=str, required=True,
+    help="path to the config file")
+parser.add_argument(
+    "--debug", action="store_true",
+    help="display the video stream instead of saving the images")
 
 
-def generator():      
-    """
-    Diese Funktion führt den Datengenerator aus. Es werden die etikettierten Stichproben
-    unter dem Pfad "path" gespeichert.
-    """
-    while True:                        
-        path = Config.val_path
-        camera_nice, camera_segment = Visualization.one_datapoint(visualization, road)                                
-        Visualization.make_metadata(visualization, camera_nice, camera_segment, path)  
-    
+def generate_synthetic(config, splitname, output_idcs):
+    road_generator = road.Road(config)
+    renderer = render.Renderer(config)
+
+    box = BoxObstacle(config=config)
+    dust1 = Dust(100000, 63)
+    dust2 = Dust(100000, 127)
+    dust3 = Dust(10000, 255)
+
+    images_base_path = config["paths"]["images_output_path"].format(splitname=splitname)
+    annotations_base_path = config["paths"]["annotations_output_path"].format(splitname=splitname)
+    image_pattern = config["paths"]["output_file_pattern"]
+
+    idx = 0
+    running = True
+    while running:
+        t1 = time.time()
+        image, image_segment, drive_points, _, camera_angles = road_generator.build_road()
+
+        renderer.update_ground_plane(image, image_segment, [box, dust1, dust2, dust3])
+        for point, angle in zip(drive_points, camera_angles):
+            renderer.update_position(point, angle)
+            perspective_nice, perspective_segment = renderer.render_images()
+            perspective_nice = np.clip(perspective_nice, 0, 255).astype(np.uint8)
+            perspective_segment = perspective_segment.astype(np.uint8)
+
+            if config["debug"]:
+                cv2.imshow(f"nice {splitname}", perspective_nice)
+                cv2.imshow(f"segment {splitname}", perspective_segment)
+                cv2.waitKey(1)
+            else:
+                cv2.imwrite(images_base_path + "/" + image_pattern.format(idx=output_idcs[idx]), perspective_nice)
+                cv2.imwrite(annotations_base_path + "/" + image_pattern.format(idx=output_idcs[idx]), perspective_segment)
+
+            if idx >= len(output_idcs) - 1:
+                running = False
+                break
+            idx += 1
+
+        print(len(drive_points) / (time.time() - t1))
 
 
-def train():             
-    """
-    Diese Funktion erstellt einen Validierungs- (val_dataset) und Trainingsdatensatz (train_dataset) 
-    und trainiert damit das neuronale Netzwerk. Die Architektur des Netzwerks wird aus der Datei "model.json" bezogen.
-    Falls vortrainierte Parameter verwendet werden sollen, kann die Datei "parameters.h5" importiert werden.
-    """
-    
-    # Lade die Architektur und Parameter des Netzwerks.
-    with open(os.path.join('model.json'), 'r') as json_file:
-        loaded_model_json = json_file.read()
-    json_file.close()
-    model = model_from_json(loaded_model_json)
-    
-    if Config.pretrain == True:
-        model.load_weights(os.path.join('parameters.h5'))
-
-    val_dataset = Dataset.create_dataset(Config.val_path, Config.image_format)  # "data/images/valset/*/"
-    train_dataset = Dataset.create_dataset(Config.train_path, Config.image_format)  # "data/images/trainset/synthetic_set/"
-
-    history = Train.train_net(train_dataset, val_dataset)
-    Explain.plot_learning(history)
-
-        
-def test():   
-    """
-    Berechnet die Metrik aus der Arbeit:
-    Güte der Inlier und Verfügbarkeit der Inlier
-    """
-    Test.line_accuracy() 
+def generate_augmented(config):
+    # TODO
+    pass
 
 
-def debug():           
-    """
-    Diese Funktion startet Tensorboard und kompiliert die Log-Datei zu einer visualisierbaren Darstellung
-    """
-    
-    tb = program.TensorBoard()
-    tb.configure(argv=[None, '--logdir', Config.ld, '--host', Config.h, '--port', Config.p])
-    tb.main()
+def init_paths(config):
+    output_path_annotations = config["paths"]["annotations_output_path"]
+    output_path_images = config["paths"]["images_output_path"]
 
+    os.makedirs(output_path_annotations.format(splitname="train_split"), exist_ok=True)
+    os.makedirs(output_path_annotations.format(splitname="validation_split"), exist_ok=True)
+    os.makedirs(output_path_annotations.format(splitname="test_split"), exist_ok=True)
 
-def create_elements():     
-    """
-    Diese Funktion generiert die Straßenelemente für den Datengenerator
-    Sie muss nur ausgeführt werden, wenn die Elemente geändert wurden.    
-    """
+    os.makedirs(output_path_images.format(splitname="train_split"), exist_ok=True)
+    os.makedirs(output_path_images.format(splitname="validation_split"), exist_ok=True)
+    os.makedirs(output_path_images.format(splitname="test_split"), exist_ok=True)
 
-    line = Line("line", "chunks")
-    right_curve = Curve("curve", "chunks", "right")
-    left_curve = Curve("curve", "chunks", "left")
-    intersection = Intersection("intersection", "chunks")
-    Line.create_chunk(line)
-    Curve.create_chunk(right_curve)
-    Curve.create_chunk(left_curve)
-    Intersection.create_chunk(intersection)
-    
-    
 
 if __name__ == "__main__":
-    
-    parser = argparse.ArgumentParser(description="Hyperparams")
-    parser.add_argument(
-        "--program",
-        nargs="?",
-        type=str,
-
-        default="show_generator",
-
-        help="Programm to execute",
-    )
-
-
-    commands = {
-        'generator': generator,
-        'train': train,
-        'test': test,
-        'debug': debug,
-        'create_elements': create_elements,                                          
-    }
-  
-    
     args = parser.parse_args()
 
-    main(args)
+    config = Config(args.config, debug=args.debug)
+    if config["seed"]:
+        random.seed(config["seed"])
+        np.random.seed(config["seed"])
+
+    init_paths(config)
+
+    idcs_train = list(range(config["splits"]["train_split"]["size"]))
+    idcs_validation = list(range(config["splits"]["validation_split"]["size"]))
+    idcs_test = list(range(config["splits"]["test_split"]["size"]))
+
+    if config["shuffle"]:
+        random.shuffle(idcs_train)
+        random.shuffle(idcs_validation)
+        random.shuffle(idcs_test)
+
+    generate_synthetic(
+        config, 
+        "train_split",
+        idcs_train[int(
+            config["splits"]["train_split"]["fraction_synthetic"] *
+            config["splits"]["train_split"]["size"]):])
+    generate_synthetic(
+        config,
+        "validation_split",
+        idcs_train[int(
+            config["splits"]["validation_split"]["fraction_synthetic"] *
+            config["splits"]["validation_split"]["size"]):])
+    generate_synthetic(
+        config,
+        "test_split",
+        idcs_train[int(
+            config["splits"]["test_split"]["fraction_synthetic"] *
+            config["splits"]["test_split"]["size"]):])
+
