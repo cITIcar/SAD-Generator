@@ -60,7 +60,8 @@ def generate_synthetic(config, splitname, output_idcs):
                 break
             idx += 1
 
-        print(len(drive_points) / (time.time() - t1))
+        if running:
+            print(len(drive_points) / (time.time() - t1))
 
 
 def generate_augmented(config):
