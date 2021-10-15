@@ -2,8 +2,8 @@
     "fov": 90,
     "camera_height": 25.5,
     "camera_angle": -5,
-    "output_size": [640, 480],
-    "rescale": 5,
+    "output_size": [128, 64],
+    "rescale": 3,
     "chunk_size_cm": 250,
     "chunk_size_px": 1000,
     "shuffle": true,
@@ -23,7 +23,7 @@
 
     "splits": {
         "train_split": {
-            "size": 300,
+            "size": 3000,
             "fraction_synthetic": 0.5,
             "fraction_augmented": 0.5
         },
