@@ -50,7 +50,7 @@ def generate_synthetic(config, splitname, output_idcs):
             if config["debug"]:
                 cv2.imshow(f"nice {splitname}", perspective_nice)
                 cv2.imshow(f"segment {splitname}", perspective_segment)
-                cv2.waitKey(1)
+                cv2.waitKey(0)
             else:
                 cv2.imwrite(images_base_path + "/" + image_pattern.format(idx=output_idcs[idx]), perspective_nice)
                 cv2.imwrite(annotations_base_path + "/" + image_pattern.format(idx=output_idcs[idx]), perspective_segment)

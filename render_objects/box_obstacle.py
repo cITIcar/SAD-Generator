@@ -34,6 +34,66 @@ class BoxObstacle(render_object.RenderObject):
 
 
     def post_transform_step(self, image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer, **kwargs):
+        reflection = self.create_reflection(image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer)
+        image += cv2.resize(reflection, image.shape[::-1])
+        self.create_obstacle(image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer)
+
+
+    def create_reflection(self, image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer):
+        empty = np.zeros(image_segment.shape)
+
+        points = np.array([
+            [*self.ground[0], 0],
+            [*self.ground[0], -self.height],
+            [*self.ground[1], -self.height],
+            [*self.ground[1], 0],
+            [*self.ground[2], 0],
+            [*self.ground[2], -self.height],
+            [*self.ground[3], -self.height],
+            [*self.ground[3], 0]])
+
+        if not np.all(points[:,1] < point[1]):
+            return empty
+
+        surfaces = [
+            np.array([
+                points[2],
+                points[3],
+                points[4],
+                points[5]]),
+
+            np.array([
+                points[0],
+                points[1],
+                points[6],
+                points[7]]),
+
+            np.array([
+                points[4],
+                points[5],
+                points[6],
+                points[7]]),
+
+            np.array([
+                points[1],
+                points[2],
+                points[5],
+                points[6]])]
+
+        surfaces.sort(key=lambda surface: -np.linalg.norm(np.average(surface, axis=0) - np.array([*point, 0])))
+ 
+        for surface, color in zip(surfaces, self.colors):
+            points_2d = np.array(list(map(
+                lambda p: renderer.project_point(p),
+                surface)))
+
+            cv2.fillPoly(empty, [(points_2d / self.rescale).astype(int)], int(color / 1.5))
+            empty = cv2.blur(empty, (11, 11))
+
+        return empty
+
+
+    def create_obstacle(self, image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer):
         points = np.array([
             [*self.ground[0], 0],
             [*self.ground[0], self.height],
