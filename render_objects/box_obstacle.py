@@ -39,7 +39,7 @@ class BoxObstacle(render_object.RenderObject):
 
     def post_transform_step(self, image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer, **kwargs):
         reflection = self.create_reflection(image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer)
-        image += cv2.resize(reflection, image.shape[::-1])
+        image += cv2.resize(reflection, image.shape[::-1], interpolation=cv2.INTER_NEAREST)
         self.create_obstacle(image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer)
 
     def create_reflection(self, image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer):
