@@ -62,8 +62,8 @@ def generate_synthetic(config, splitname, output_idcs):
                 break
             idx += 1
 
-#        if running:
-#            print(len(drive_points) / (time.time() - t1))
+        if running:
+            print(f"\033[1A\033[K{len(drive_points) / (time.time() - t1):.5} fps")
 
 
 def generate_augmented(config, splitname, output_idcs):
