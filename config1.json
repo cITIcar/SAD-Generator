@@ -3,7 +3,7 @@
     "camera_height": 25.5,
     "camera_angle": -5,
     "output_size": [128, 64],
-    "rescale": 3,
+    "rescale": 8,
     "chunk_size_cm": 250,
     "chunk_size_px": 1000,
     "shuffle": true,
@@ -14,8 +14,8 @@
     "paths": {
         "annotations_output_path": "data/annotations/{splitname}/some_set",
         "images_output_path": "data/images/{splitname}/some_set",
-        "manual_annotated_input_path": "",
-        "manual_images_input_path": "",
+        "manual_annotations_input_path": "real_dataset/annotations",
+        "manual_images_input_path": "real_dataset/images",
         "chunk_path": "chunks",
         "chunk_file_pattern": "{chunk_type}_{variant}",
         "output_file_pattern": "image_{idx}.png"
@@ -23,7 +23,7 @@
 
     "splits": {
         "train_split": {
-            "size": 3000,
+            "size": 300,
             "fraction_synthetic": 0.5,
             "fraction_augmented": 0.5
         },

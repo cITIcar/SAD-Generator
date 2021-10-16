@@ -11,6 +11,8 @@ from config import Config
 import road
 import render
 from render_objects import BoxObstacle, Dust
+import augment
+
 
 parser = argparse.ArgumentParser(description="generate training data")
 parser.add_argument(
@@ -60,13 +62,21 @@ def generate_synthetic(config, splitname, output_idcs):
                 break
             idx += 1
 
-        if running:
-            print(len(drive_points) / (time.time() - t1))
+#        if running:
+#            print(len(drive_points) / (time.time() - t1))
 
 
-def generate_augmented(config):
-    # TODO
-    pass
+def generate_augmented(config, splitname, output_idcs):
+    annotations_input_path = config["paths"]["manual_annotations_input_path"]
+    images_input_path = config["paths"]["manual_images_input_path"]
+
+    images_base_path = config["paths"]["images_output_path"].format(splitname=splitname)
+    annotations_base_path = config["paths"]["annotations_output_path"].format(splitname=splitname)
+    image_pattern = config["paths"]["output_file_pattern"]
+
+    augment.augment_dataset(
+        annotations_input_path, images_input_path, 
+        annotations_base_path, images_base_path, output_idcs, config)
 
 
 def init_paths(config):
@@ -101,22 +111,50 @@ if __name__ == "__main__":
         random.shuffle(idcs_validation)
         random.shuffle(idcs_test)
 
+    print("generating synthetic:")
+    print("train split")
     generate_synthetic(
         config,
         "train_split",
         idcs_train[int(
             config["splits"]["train_split"]["fraction_synthetic"] *
             config["splits"]["train_split"]["size"]):])
+    print("validation split")
     generate_synthetic(
         config,
         "validation_split",
         idcs_validation[int(
             config["splits"]["validation_split"]["fraction_synthetic"] *
             config["splits"]["validation_split"]["size"]):])
+    print("test split")
     generate_synthetic(
         config,
         "test_split",
         idcs_test[int(
             config["splits"]["test_split"]["fraction_synthetic"] *
             config["splits"]["test_split"]["size"]):])
+
+    print("generating augmented:")
+    print("train split")
+    generate_augmented(
+        config,
+        "train_split",
+        idcs_train[:int(
+            config["splits"]["train_split"]["fraction_augmented"] *
+            config["splits"]["train_split"]["size"])])
+    print("validation split")
+    generate_augmented(
+        config,
+        "validation_split",
+        idcs_validation[:int(
+            config["splits"]["validation_split"]["fraction_augmented"] *
+            config["splits"]["validation_split"]["size"])])
+    print("test split")
+    generate_augmented(
+        config,
+        "test_split",
+        idcs_test[:int(
+            config["splits"]["test_split"]["fraction_augmented"] *
+            config["splits"]["test_split"]["size"])])
+
 
