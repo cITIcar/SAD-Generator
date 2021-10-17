@@ -17,6 +17,7 @@ class Renderer:
         self.position_y = 0
         self.position_z = config["camera_height_px"]
 
+        self.render_objects = []
         self.update_position((self.position_x, self.position_y), self.angle_z)
 
 
@@ -31,6 +32,13 @@ class Renderer:
 
 
     def update_position(self, position, angle):
+        for obj in self.render_objects:
+            if obj.update_position_step:
+                position, angle = obj.update_position_step(
+                    position=position,
+                    angle=angle,
+                    renderer=self)
+
         self.position_x, self.position_y = position
         self.angle_z = -angle
         rotation_x = np.array([

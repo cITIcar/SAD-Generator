@@ -10,7 +10,7 @@ import cv2
 from config import Config
 import road
 import render
-from render_objects import BoxObstacle, Dust, RandomBrightness, RandomClipMax
+from render_objects import BoxObstacle, Dust, RandomBrightness, RandomClipMax, DrunkDriving
 import augment
 
 
@@ -24,7 +24,6 @@ parser.add_argument(
 
 
 def generate_synthetic(config, splitname, output_idcs):
-    print(output_idcs)
     road_generator = road.Road(config)
     renderer = render.Renderer(config)
 
@@ -37,6 +36,7 @@ def generate_synthetic(config, splitname, output_idcs):
     rb = RandomBrightness()
     cm1 = RandomClipMax()
     cm2 = RandomClipMax()
+    dd = DrunkDriving()
 
     images_base_path = config["paths"]["images_output_path"].format(splitname=splitname)
     annotations_base_path = config["paths"]["annotations_output_path"].format(splitname=splitname)
@@ -48,7 +48,7 @@ def generate_synthetic(config, splitname, output_idcs):
         t1 = time.time()
         image, image_segment, drive_points, _, camera_angles = road_generator.build_road()
 
-        renderer.update_ground_plane(image, image_segment, [box1, box2, box3, dust1, dust2, dust3, cm1, cm2, rb])
+        renderer.update_ground_plane(image, image_segment, [box1, box2, box3, dust1, dust2, dust3, cm1, cm2, rb, dd])
         for point, angle in zip(drive_points, camera_angles):
             renderer.update_position(point, angle)
             perspective_nice, perspective_segment = renderer.render_images()

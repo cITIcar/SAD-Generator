@@ -10,9 +10,9 @@ class RandomClipMax(render_object.RenderObject):
         self.idx = 0
         self.new_clip_curve()
 
+
     def new_clip_curve(self):
         frequency = np.random.randint(self.frequency_from, self.frequency_to)
-        print(frequency)
         self.brightness_clip = np.sin(np.linspace(0, np.pi * 2 * frequency, 100))
 
 
