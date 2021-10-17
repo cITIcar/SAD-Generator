@@ -19,6 +19,8 @@ class Renderer:
 
         self.render_objects = []
         self.update_position((self.position_x, self.position_y), self.angle_z)
+        horizon_point = self.h_segmentation @ np.array([[0],[1],[0]])
+        self.horizon_fraction = (horizon_point[1] / horizon_point[2]) / self.config["output_size"][1]
 
 
     def project_point(self, coord):
@@ -88,9 +90,8 @@ class Renderer:
         perspective_camera = cv2.warpPerspective(self.image_real, self.h_camera, (width * rescale, height * rescale), flags=cv2.INTER_NEAREST).astype(np.float32)
         perspective_segmentation = cv2.warpPerspective(self.image_segmentation, self.h_segmentation, (width, height), flags=cv2.INTER_NEAREST).astype(np.float32)
 
-        # TODO: calc horizon
-        perspective_camera[:int(len(perspective_camera) * 0.45)] = 0
-        perspective_segmentation[:int(len(perspective_segmentation) * 0.45)] = 0
+        perspective_camera[:int(len(perspective_camera) * self.horizon_fraction)] = 0
+        perspective_segmentation[:int(len(perspective_segmentation) * self.horizon_fraction)] = 0
 
         for obj in self.render_objects:
             if obj.post_transform_step:
