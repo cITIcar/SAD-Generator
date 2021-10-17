@@ -27,16 +27,17 @@ def generate_synthetic(config, splitname, output_idcs):
     road_generator = road.Road(config)
     renderer = render.Renderer(config)
 
-    box1 = BoxObstacle(config=config)
-    box2 = BoxObstacle(config=config)
-    box3 = BoxObstacle(config=config)
-    dust1 = Dust(100000, 63)
-    dust2 = Dust(100000, 127)
-    dust3 = Dust(10000, 255)
-    rb = RandomBrightness()
-    cm1 = RandomClipMax()
-    cm2 = RandomClipMax()
-    dd = DrunkDriving()
+    objects = [
+        BoxObstacle(config=config),
+        BoxObstacle(config=config),
+        Dust(100000, 63),
+        Dust(100000, 127),
+        Dust(10000, 255),
+        RandomBrightness(),
+        RandomClipMax(),
+        RandomClipMax(),
+        DrunkDriving(),
+    ]
 
     images_base_path = config["paths"]["images_output_path"].format(splitname=splitname)
     annotations_base_path = config["paths"]["annotations_output_path"].format(splitname=splitname)
@@ -48,7 +49,7 @@ def generate_synthetic(config, splitname, output_idcs):
         t1 = time.time()
         image, image_segment, drive_points, _, camera_angles = road_generator.build_road()
 
-        renderer.update_ground_plane(image, image_segment, [box1, box2, box3, dust1, dust2, dust3, cm1, cm2, rb, dd])
+        renderer.update_ground_plane(image, image_segment, objects)
         for point, angle in zip(drive_points, camera_angles):
             renderer.update_position(point, angle)
             perspective_nice, perspective_segment = renderer.render_images()
@@ -58,7 +59,7 @@ def generate_synthetic(config, splitname, output_idcs):
             if config["debug"]:
                 cv2.imshow(f"nice {splitname}", perspective_nice)
                 cv2.imshow(f"segment {splitname}", perspective_segment)
-                cv2.waitKey(1)
+                cv2.waitKey(0)
             else:
                 cv2.imwrite(images_base_path + "/" + image_pattern.format(idx=output_idcs[idx]), perspective_nice)
                 cv2.imwrite(annotations_base_path + "/" + image_pattern.format(idx=output_idcs[idx]), perspective_segment)

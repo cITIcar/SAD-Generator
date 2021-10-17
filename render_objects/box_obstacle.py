@@ -16,11 +16,11 @@ class BoxObstacle(render_object.RenderObject):
         self.blur = config["output_size"][0] // 50
         if self.blur % 2 == 0:
             self.blur += 1
-
+        self.camera_height_px = config["camera_height"] * config["px_per_cm"]
 
     def pre_transform_step(self, **kwargs):
         """
-        create random rectangle relative to the cars position
+        create random rectangle on the ground
         """
         width = random.random() * (self.max_size - self.min_size) + self.min_size
         length = random.random() * (self.max_size - self.min_size) + self.min_size
@@ -38,52 +38,56 @@ class BoxObstacle(render_object.RenderObject):
 
 
     def post_transform_step(self, image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer, **kwargs):
+        self.points = np.array([
+            [*self.ground[0], 0],
+            [*self.ground[0], self.height],
+            [*self.ground[1], self.height],
+            [*self.ground[1], 0],
+            [*self.ground[2], 0],
+            [*self.ground[2], self.height],
+            [*self.ground[3], self.height],
+            [*self.ground[3], 0]])
+
+        diff = self.points[:,:2] - np.repeat([np.array(point)], 8, axis=0)
+        rot = np.array([[np.cos(angle), np.sin(angle)], [-np.sin(angle), np.cos(angle)]])
+
+        if not np.all((diff @ rot)[:,1] < 0):
+            return
+
         reflection = self.create_reflection(image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer)
         image += cv2.resize(reflection, image.shape[::-1], interpolation=cv2.INTER_NEAREST)
         self.create_obstacle(image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer)
 
+
     def create_reflection(self, image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer):
         empty = np.zeros(image_segment.shape)
 
-        points = np.array([
-            [*self.ground[0], 0],
-            [*self.ground[0], -self.height],
-            [*self.ground[1], -self.height],
-            [*self.ground[1], 0],
-            [*self.ground[2], 0],
-            [*self.ground[2], -self.height],
-            [*self.ground[3], -self.height],
-            [*self.ground[3], 0]])
-
-        if not np.all(points[:,1] < point[1]):
-            return empty
-
         surfaces = [
             np.array([
-                points[2],
-                points[3],
-                points[4],
-                points[5]]),
+                self.points[2],
+                self.points[3],
+                self.points[4],
+                self.points[5]]) * np.array([1, 1, -1]),
 
             np.array([
-                points[0],
-                points[1],
-                points[6],
-                points[7]]),
+                self.points[0],
+                self.points[1],
+                self.points[6],
+                self.points[7]]) * np.array([1, 1, -1]),
 
             np.array([
-                points[4],
-                points[5],
-                points[6],
-                points[7]]),
+                self.points[4],
+                self.points[5],
+                self.points[6],
+                self.points[7]]) * np.array([1, 1, -1]),
 
             np.array([
-                points[1],
-                points[2],
-                points[5],
-                points[6]])]
+                self.points[1],
+                self.points[2],
+                self.points[5],
+                self.points[6]]) * np.array([1, 1, -1])]
 
-        surfaces.sort(key=lambda surface: -np.linalg.norm(np.average(surface, axis=0) - np.array([*point, 0])))
+        surfaces.sort(key=lambda surface: -np.linalg.norm(np.average(surface, axis=0) - np.array([*point, self.camera_height_px])))
 
         for surface, color in zip(surfaces, self.colors):
             points_2d = np.array(list(map(
@@ -97,45 +101,32 @@ class BoxObstacle(render_object.RenderObject):
 
 
     def create_obstacle(self, image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer):
-        points = np.array([
-            [*self.ground[0], 0],
-            [*self.ground[0], self.height],
-            [*self.ground[1], self.height],
-            [*self.ground[1], 0],
-            [*self.ground[2], 0],
-            [*self.ground[2], self.height],
-            [*self.ground[3], self.height],
-            [*self.ground[3], 0]])
-
-        if not np.all(points[:,1] < point[1]):
-            return
-
         surfaces = [
             np.array([
-                points[2],
-                points[3],
-                points[4],
-                points[5]]),
+                self.points[2],
+                self.points[3],
+                self.points[4],
+                self.points[5]]),
 
             np.array([
-                points[0],
-                points[1],
-                points[6],
-                points[7]]),
+                self.points[0],
+                self.points[1],
+                self.points[6],
+                self.points[7]]),
 
             np.array([
-                points[4],
-                points[5],
-                points[6],
-                points[7]]),
+                self.points[4],
+                self.points[5],
+                self.points[6],
+                self.points[7]]),
 
             np.array([
-                points[1],
-                points[2],
-                points[5],
-                points[6]])]
+                self.points[1],
+                self.points[2],
+                self.points[5],
+                self.points[6]])]
 
-        surfaces.sort(key=lambda surface: -np.linalg.norm(np.average(surface, axis=0) - np.array([*point, 0])))
+        surfaces.sort(key=lambda surface: -np.linalg.norm(np.average(surface, axis=0) - np.array([*point, self.camera_height_px])))
 
         for surface, color in zip(surfaces, self.colors):
             points_2d = np.array(list(map(
