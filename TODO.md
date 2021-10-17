@@ -1,3 +1,3 @@
-- obstacles still sometimes render behind
 - config for adding render objects
 - README.md
+- fix global reflection? 
