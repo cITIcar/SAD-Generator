@@ -10,7 +10,7 @@ import cv2
 from config import Config
 import road
 import render
-from render_objects import BoxObstacle, Dust
+from render_objects import BoxObstacle, Dust, RandomBrightness, RandomClipMax
 import augment
 
 
@@ -24,13 +24,19 @@ parser.add_argument(
 
 
 def generate_synthetic(config, splitname, output_idcs):
+    print(output_idcs)
     road_generator = road.Road(config)
     renderer = render.Renderer(config)
 
-    box = BoxObstacle(config=config)
+    box1 = BoxObstacle(config=config)
+    box2 = BoxObstacle(config=config)
+    box3 = BoxObstacle(config=config)
     dust1 = Dust(100000, 63)
     dust2 = Dust(100000, 127)
     dust3 = Dust(10000, 255)
+    rb = RandomBrightness()
+    cm1 = RandomClipMax()
+    cm2 = RandomClipMax()
 
     images_base_path = config["paths"]["images_output_path"].format(splitname=splitname)
     annotations_base_path = config["paths"]["annotations_output_path"].format(splitname=splitname)
@@ -42,7 +48,7 @@ def generate_synthetic(config, splitname, output_idcs):
         t1 = time.time()
         image, image_segment, drive_points, _, camera_angles = road_generator.build_road()
 
-        renderer.update_ground_plane(image, image_segment, [box, dust1, dust2, dust3])
+        renderer.update_ground_plane(image, image_segment, [box1, box2, box3, dust1, dust2, dust3, cm1, cm2, rb])
         for point, angle in zip(drive_points, camera_angles):
             renderer.update_position(point, angle)
             perspective_nice, perspective_segment = renderer.render_images()
@@ -116,44 +122,44 @@ if __name__ == "__main__":
     generate_synthetic(
         config,
         "train_split",
-        idcs_train[int(
-            config["splits"]["train_split"]["fraction_synthetic"] *
+        idcs_train[round(
+            (1 - config["splits"]["train_split"]["fraction_synthetic"]) *
             config["splits"]["train_split"]["size"]):])
     print("validation split")
     generate_synthetic(
         config,
         "validation_split",
-        idcs_validation[int(
-            config["splits"]["validation_split"]["fraction_synthetic"] *
-            config["splits"]["validation_split"]["size"]):])
+        idcs_validation[round(
+            (1 - config["splits"]["train_split"]["fraction_synthetic"]) *
+            config["splits"]["train_split"]["size"]):])
     print("test split")
     generate_synthetic(
         config,
         "test_split",
-        idcs_test[int(
-            config["splits"]["test_split"]["fraction_synthetic"] *
-            config["splits"]["test_split"]["size"]):])
+        idcs_test[round(
+            (1 - config["splits"]["train_split"]["fraction_synthetic"]) *
+            config["splits"]["train_split"]["size"]):])
 
     print("generating augmented:")
     print("train split")
     generate_augmented(
         config,
         "train_split",
-        idcs_train[:int(
+        idcs_train[:round(
             config["splits"]["train_split"]["fraction_augmented"] *
             config["splits"]["train_split"]["size"])])
     print("validation split")
     generate_augmented(
         config,
         "validation_split",
-        idcs_validation[:int(
+        idcs_validation[:round(
             config["splits"]["validation_split"]["fraction_augmented"] *
             config["splits"]["validation_split"]["size"])])
     print("test split")
     generate_augmented(
         config,
         "test_split",
-        idcs_test[:int(
+        idcs_test[:round(
             config["splits"]["test_split"]["fraction_augmented"] *
             config["splits"]["test_split"]["size"])])
 
