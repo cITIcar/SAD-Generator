@@ -40,6 +40,7 @@
     },
 
     "disturbances": {
+        "HiddenGroundRect": [],
         "BoxObstacle": [],
         "BoxObstacle": [],
         "Dust": [100000, 63],

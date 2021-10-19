@@ -10,7 +10,7 @@ import cv2
 from config import Config
 import road
 import render
-from disturbances import BoxObstacle, Dust, RandomBrightness, RandomClipMax, DrunkDriving
+from disturbances import *
 import augment
 
 
