@@ -2,9 +2,9 @@ import random
 import numpy as np
 import cv2
 
-from . import render_object
+from . import disturbance
 
-class HiddenGroundRect(render_object.RenderObject):
+class HiddenGroundRect(disturbance.Disturbance):
     def __init__(self, min_size=1000, max_size=3000):
         self.min_size = min_size
         self.max_size = max_size

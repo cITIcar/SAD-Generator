@@ -3,9 +3,9 @@ import cv2
 from numpy import cos, sin
 import math
 
-from . import render_object
+from . import disturbance
 
-class GaussReflection(render_object.RenderObject):
+class GaussReflection(disturbance.Disturbance):
     def __init__(self, position, **kwargs):
         self.gauss_reflection = GaussReflection.create_gauss_reflection()
         self.position = position

@@ -1,5 +1,5 @@
 
-class RenderObject:
+class Disturbance:
     def __init__(self, **kwargs):
         pass
 

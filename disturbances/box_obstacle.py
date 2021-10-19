@@ -3,10 +3,10 @@ import numpy as np
 import cv2
 import time
 
-from . import render_object
+from . import disturbance
 from render import Renderer
 
-class BoxObstacle(render_object.RenderObject):
+class BoxObstacle(disturbance.Disturbance):
     def __init__(self, min_size=50, max_size=150, colors=[200, 127, 100, 50], config=None):
         self.min_size = min_size
         self.max_size = max_size

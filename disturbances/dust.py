@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
 
-from . import render_object
+from . import disturbance
 
-class Dust(render_object.RenderObject):
+class Dust(disturbance.Disturbance):
     def __init__(self, particles=10000, color=255, **kwargs):
         self.particles = particles
         self.color = color
