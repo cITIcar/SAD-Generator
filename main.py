@@ -112,21 +112,21 @@ if __name__ == "__main__":
         random.shuffle(idcs_test)
 
     print("generating synthetic:")
-    print("train split")
+    print("train split\n")
     generate_synthetic(
         config,
         "train_split",
         idcs_train[round(
             (1 - config["splits"]["train_split"]["fraction_synthetic"]) *
             config["splits"]["train_split"]["size"]):])
-    print("validation split")
+    print("validation split\n")
     generate_synthetic(
         config,
         "validation_split",
         idcs_validation[round(
             (1 - config["splits"]["train_split"]["fraction_synthetic"]) *
             config["splits"]["train_split"]["size"]):])
-    print("test split")
+    print("test split\n")
     generate_synthetic(
         config,
         "test_split",
