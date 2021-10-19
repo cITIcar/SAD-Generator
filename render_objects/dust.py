@@ -4,9 +4,10 @@ import numpy as np
 from . import render_object
 
 class Dust(render_object.RenderObject):
-    def __init__(self, particles=10000, color=255):
+    def __init__(self, particles=10000, color=255, **kwargs):
         self.particles = particles
         self.color = color
+
 
     def pre_transform_step(self, image, **kwargs):
         dust_idcs = (

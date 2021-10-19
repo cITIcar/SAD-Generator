@@ -27,17 +27,10 @@ def generate_synthetic(config, splitname, output_idcs):
     road_generator = road.Road(config)
     renderer = render.Renderer(config)
 
+    # initialize disturbances from the config file
     objects = [
-        BoxObstacle(config=config),
-        BoxObstacle(config=config),
-        Dust(100000, 63),
-        Dust(100000, 127),
-        Dust(10000, 255),
-        RandomBrightness(),
-        RandomClipMax(),
-        RandomClipMax(),
-        DrunkDriving(),
-    ]
+        globals()[obj](*params, config=config)
+        for obj, params in config["disturbances"].items() ]
 
     images_base_path = config["paths"]["images_output_path"].format(splitname=splitname)
     annotations_base_path = config["paths"]["annotations_output_path"].format(splitname=splitname)
@@ -48,8 +41,8 @@ def generate_synthetic(config, splitname, output_idcs):
     while running:
         t1 = time.time()
         image, image_segment, drive_points, _, camera_angles = road_generator.build_road()
-
         renderer.update_ground_plane(image, image_segment, objects)
+
         for point, angle in zip(drive_points, camera_angles):
             renderer.update_position(point, angle)
             perspective_nice, perspective_segment = renderer.render_images()

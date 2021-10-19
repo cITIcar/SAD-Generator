@@ -4,7 +4,7 @@ import numpy as np
 from . import render_object
 
 class DrunkDriving(render_object.RenderObject):
-    def __init__(self, frequency_from=1, frequency_to=4, max_error_x=200, max_error_y=100):
+    def __init__(self, frequency_from=1, frequency_to=4, max_error_x=200, max_error_y=100, **kwargs):
         self.frequency_from = frequency_from
         self.frequency_to = frequency_to
         self.max_error_x = max_error_x

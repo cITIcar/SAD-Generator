@@ -6,7 +6,7 @@ import math
 from . import render_object
 
 class GaussReflection(render_object.RenderObject):
-    def __init__(self, position):
+    def __init__(self, position, **kwargs):
         self.gauss_reflection = GaussReflection.create_gauss_reflection()
         self.position = position
 

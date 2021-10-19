@@ -4,7 +4,7 @@ import numpy as np
 from . import render_object
 
 class RandomClipMax(render_object.RenderObject):
-    def __init__(self, frequency_from=1, frequency_to=20):
+    def __init__(self, frequency_from=1, frequency_to=20, **kwargs):
         self.frequency_from = frequency_from
         self.frequency_to = frequency_to
         self.idx = 0
