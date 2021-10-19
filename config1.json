@@ -37,5 +37,17 @@
             "fraction_synthetic": 0.5,
             "fraction_augmented": 0.5
         }
+    },
+
+    "disturbances": {
+        "BoxObstacle": [],
+        "BoxObstacle": [],
+        "Dust": [100000, 63],
+        "Dust": [100000, 127],
+        "Dust": [10000, 255],
+        "RandomBrightness": [],
+        "RandomClipMax": [],
+        "RandomClipMax": [],
+        "DrunkDriving": []
     }
 }
