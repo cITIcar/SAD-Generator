@@ -6,7 +6,6 @@ This data generator is meant to create datasets for training image segmentation 
 
 TODO: requirements.txt
 
-
 ## Running
 
 Use 
@@ -34,5 +33,16 @@ chosen for each new segment.
 TODO
 
 
-### render_objects
-TODO
+### disturbances
+The generator is capable of creating various disturbing factors.  
+These may be objects that are added to the scene, or changes in the driving behaviour.
+
+The folder `disturbances` contains a set of predefined desturbing factors:
+
+- _BoxObstacle_ places a box of random size and position into the scene.  
+Since there is a class associated with an obstacle, it is rendered both in the camera image and the segmentation image.
+- _RandomClipMax_ reguarily chooses a random frequency at which it clips the brightness of the output image.
+- _RandomBrightness_ randomly brightens the output image.
+- _HiddenGroundRect_ hides a section of the ground. The segmentation image is no affected.
+- _Dust_ sets a number of randomly selected pixels on the ground plane to a defined color to simulate dust.
+- _DrunkDriving_ adds a continuous error following a sine wave to the drive path to simulate mistakes in the driving behavior.
