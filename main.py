@@ -124,15 +124,15 @@ if __name__ == "__main__":
         config,
         "validation_split",
         idcs_validation[round(
-            (1 - config["splits"]["train_split"]["fraction_synthetic"]) *
-            config["splits"]["train_split"]["size"]):])
+            (1 - config["splits"]["validation_split"]["fraction_synthetic"]) *
+            config["splits"]["validation_split"]["size"]):])
     print("test split\n")
     generate_synthetic(
         config,
         "test_split",
         idcs_test[round(
-            (1 - config["splits"]["train_split"]["fraction_synthetic"]) *
-            config["splits"]["train_split"]["size"]):])
+            (1 - config["splits"]["test_split"]["fraction_synthetic"]) *
+            config["splits"]["test_split"]["size"]):])
 
     print("generating augmented:")
     print("train split")
