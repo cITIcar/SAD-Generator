@@ -8,7 +8,7 @@ TODO: requirements.txt
 
 ## Running
 
-Use 
+Use
 ```bash
 python main.py --config config1.json
 ```
@@ -19,12 +19,13 @@ For debugging purposes the switch `--debug` may be used to display the video str
 ## Configuration
 
 ### JSON Config File
-JSON configuration files are used for most of the configuration.  
-TODO: full explanation probably in another md file
+JSON configuration files are used for most of the configuration.
+
+The full reference is available in [CONFIG.md](CONFIG.md).
 
 ### chunks
-For synthetic image creation the `chunk` folder is used to dynamically create and annotate a ground plane 
-from the funamental building blocks `curve_left`, `curve_right`, `line` and `intersection`.  
+For synthetic image creation the `chunk` folder is used to dynamically create and annotate a ground plane
+from the funamental building blocks `curve_left`, `curve_right`, `line` and `intersection`.
 The additional JSON files define the driving path of the simulated vehicle along the road.
 Each of the chunk type may have several variants that use the same segmentation map. While running a random variant
 chosen for each new segment.
@@ -34,12 +35,12 @@ TODO
 
 
 ### disturbances
-The generator is capable of creating various disturbing factors.  
+The generator is capable of creating various disturbing factors.
 These may be objects that are added to the scene, or changes in the driving behaviour.
 
 The folder `disturbances` contains a set of predefined desturbing factors:
 
-- _BoxObstacle_ places a box of random size and position into the scene.  
+- _BoxObstacle_ places a box of random size and position into the scene.
 Since there is a class associated with an obstacle, it is rendered both in the camera image and the segmentation image.
 - _RandomClipMax_ reguarily chooses a random frequency at which it clips the brightness of the output image.
 - _RandomBrightness_ randomly brightens the output image.
