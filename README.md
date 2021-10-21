@@ -4,7 +4,14 @@ This data generator is meant to create datasets for training image segmentation 
 
 ## Dependencies
 
-TODO: requirements.txt
+- OpenCV
+- Numpy
+
+Run
+```
+pip install -r requirements.txt
+```
+to install dependencies.
 
 ## Running
 
