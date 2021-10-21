@@ -28,9 +28,7 @@ class Config:
 
     def create_intrinsic_from(fov, output_size):
         output_width, output_height = output_size
-        focal_length = math.tan(fov / 180 * np.pi / 2) * output_width / 2
-
-        print(f"focal_length {focal_length}")
+        focal_length = (output_width / 2) / math.tan((fov / 180 * np.pi) / 2)
 
         return np.float32([
             [-focal_length, 0, output_width / 2, 0],
