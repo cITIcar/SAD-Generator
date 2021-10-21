@@ -1,6 +1,6 @@
 # Data Generator
 
-This data generator is meant to create datasets for training image segmentation for self-driving vehicles using a combination of fully synthetic and manually annotated images.
+This data generator is meant to create datasets for training image segmentation for self-driving vehicles using a combination of fully synthetic and augmented manually annotated images.
 
 ## Dependencies
 
@@ -38,12 +38,35 @@ TODO
 The generator is capable of creating various disturbing factors.
 These may be objects that are added to the scene, or changes in the driving behaviour.
 
-The folder `disturbances` contains a set of predefined desturbing factors:
+The folder `disturbances` contains a set of predefined disturbing factors:
 
-- _BoxObstacle_ places a box of random size and position into the scene.
+- _BoxObstacle_ Places a box of random size and position into the scene.
 Since there is a class associated with an obstacle, it is rendered both in the camera image and the segmentation image.
-- _RandomClipMax_ reguarily chooses a random frequency at which it clips the brightness of the output image.
-- _RandomBrightness_ randomly brightens the output image.
-- _HiddenGroundRect_ hides a section of the ground. The segmentation image is no affected.
-- _Dust_ sets a number of randomly selected pixels on the ground plane to a defined color to simulate dust.
-- _DrunkDriving_ adds a continuous error following a sine wave to the drive path to simulate mistakes in the driving behavior.
+- _RandomClipMax_ Reguarily Chooses a random frequency at which it clips the brightness of the output image.
+- _RandomBrightness_ Randomly brightens the output image.
+- _HiddenGroundRect_ Hides a section of the ground. The segmentation image is no affected.
+- _Dust_ Sets a number of randomly selected pixels on the ground plane to a defined color to simulate dust.
+- _DrunkDriving_ Adds a continuous error following a sine wave to the drive path to simulate mistakes in the driving behavior.
+
+#### Adding a new Disturbance
+
+Each disturbance needs to inherit the class `Disturbance` defined in `disturbances/disturbance.py`.  
+A new class may then overwrite one or more of the methods `pre_transform_step`, `post_transform_step` and `update_position_step`.  
+
+The `pre_transform_step` is applied whenever the ground plane is updated in the renderer.  
+In this step a reference to the global ground plane both segmented and real is passed to the method. 
+
+`post_transform_step` is applied after the ground plane has been rendered into the image. This step may be used to apply effects to the camera image, like changes in contrast or brightness or to render in objects using `renderer.project_point`.  
+The parameters passed to this method are:
+
+- `image`: The camera image.
+- `image_segment`: The segmentation image.
+- `point`: The current position of the vehicle.
+- `angle` The current angle of the vehicle relative to the current ground plane.
+- `bird_to_camera_nice`: The homography matrix to transform the ground plane according to the current position for the camera. 
+- `bird_to_camera_segment`: The homography matrix to transform the ground plane for the segmentation image.
+- `renderer`: A reference to the renderer object.
+
+The `update_position_step` is called whenever the position of the vehicle is updated. It receives the current position and angle and is expected to return both as a tuple, making it possible to modify the drive path defined in the chunk JSON files.
+
+Finally, the class field `ordering` is used to determine the rendering order. It is used both for the order of the `pre_transform_step` and the `post_transform_step`, but can be modified in between. For rendering objects this value should be set in the `pre_transform_step` to the distance of the object to the camera.
