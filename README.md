@@ -1,6 +1,22 @@
 # Data Generator
 
-This data generator is meant to create datasets for training image segmentation for self-driving vehicles using a combination of fully synthetic and augmented manually annotated images.
+Robust scene understanding algorithms are essential for the success of autonomous navigation. Unfortunately the supervised learning of semantic segmentation requires large and diverse datasets. For certain self-driving tasks like navigating a robot inside an industrial facility no datasets are freely available and the manual annotation of large datasets is impracticable for smaller development teams. Although approaches exist to automatically generate synthetic data, they are either too computational expensive, demand a huge preparation effort or miss a large variety of features.  
+
+This data generator gives a simple and fast approach to create artificial datasets with sufficient variety for self-driving tasks on flat ground planes.
+
+## Creating a virtual environment
+
+It is recommended to create a [virtual environment](https://docs.python.org/3/library/venv.html#venv-def) and install all dependencies inside:
+```
+# under Linux
+python3 -m venv venv4datagenerator
+source venv4datagenerator/bin/activate
+
+# under Windows
+# the PATH variable needs to be configured, otherwise use the full path to the python executable
+python -m venv venv4datagenerator
+venv4datagenerator\Scripts\activate.bat
+```
 
 ## Dependencies
 
