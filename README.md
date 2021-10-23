@@ -1,11 +1,20 @@
 
 # Data Generator
 
-https://raw.githubusercontent.com/padiro/datengenerator/main/example.mp4?token=AVGRE5HTV6OCD7XJ7356UE3BOP74K
+This repository contains code to easily generate synthetic datasets.
+
+https://user-images.githubusercontent.com/88937076/138556367-ae4f4292-7c83-414f-9d0e-bb263280cec3.mp4
 
 Robust scene understanding algorithms are essential for the success of autonomous navigation. Unfortunately the supervised learning of semantic segmentation requires large and diverse datasets. For certain self-driving tasks like navigating a robot inside an industrial facility no datasets are freely available and the manual annotation of large datasets is impracticable for smaller development teams. Although approaches exist to automatically generate synthetic data, they are either too computational expensive, demand a huge preparation effort or miss a large variety of features.  
 
 This data generator gives a simple and fast approach to create artificial datasets with sufficient variety for self-driving tasks on flat ground planes.
+
+## Citing
+
+If our code helped you, please consider citing our paper:  
+- [1] Pau Dietz Romero, Merlin David Mengel, Jakob Czekansky  
+  [Synthesising large, low cost and diverse datasets for robust semantic segmentation in self-driving tasks]()
+
 
 ## Creating a virtual environment
 
