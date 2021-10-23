@@ -1,7 +1,7 @@
 
 # Data Generator
 
-This repository contains code to easily generate synthetic datasets.
+This repository contains code to easily generate synthetic datasets or augment manually annotated real world datasets.
 
 https://user-images.githubusercontent.com/88937076/138556367-ae4f4292-7c83-414f-9d0e-bb263280cec3.mp4
 
