@@ -65,7 +65,11 @@ The additional JSON files define the driving path of the simulated vehicle along
 Each of the chunk type may have several variants that use the same segmentation map. While running a random variant
 chosen for each new segment.
 
+This figure shows how the ground plane is modularly constructed by chunks.
 <img width="50%" src="https://user-images.githubusercontent.com/88937076/138558644-222a3bcd-ea1d-46ec-918f-5033dd79b3ef.png"></img>
+
+In our example the chunks represent the building blocks of a miniature track for a model car. By changing the chunk images, one can adapt the data generator to their own self-driving task. Every chunk has its annotation. 
+The chunk images need a consistent scale, size which has to be defined in the config. Additionally the images have to be undistored and be in bird's-eye-view.
 
 ### overlays
 
