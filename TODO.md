@@ -1,2 +1,4 @@
 - README.md
-- fix global reflection? 
+- fix global reflection?
+- cite paper
+- datasplits dynamic

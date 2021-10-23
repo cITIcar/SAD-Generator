@@ -1,7 +1,7 @@
 
 # Data Generator
 
-![example video](example.webm)
+https://github.com/padiro/datengenerator/raw/main/example.webm
 
 Robust scene understanding algorithms are essential for the success of autonomous navigation. Unfortunately the supervised learning of semantic segmentation requires large and diverse datasets. For certain self-driving tasks like navigating a robot inside an industrial facility no datasets are freely available and the manual annotation of large datasets is impracticable for smaller development teams. Although approaches exist to automatically generate synthetic data, they are either too computational expensive, demand a huge preparation effort or miss a large variety of features.  
 

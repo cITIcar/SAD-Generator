@@ -6,6 +6,7 @@
     "rescale": 3,
     "chunk_size_cm": 250,
     "chunk_size_px": 1000,
+
     "shuffle": false,
     "seed": 123456,
 
@@ -23,8 +24,8 @@
 
     "splits": {
         "train_split": {
-            "size": 3000,
-            "fraction_synthetic": 0.8,
+            "size": 900,
+            "fraction_synthetic": 1.0,
             "fraction_augmented": 0
         },
         "validation_split": {
@@ -34,21 +35,19 @@
         },
         "test_split": {
             "size": 0,
-            "fraction_synthetic": 0.5,
-            "fraction_augmented": 0.5
+            "fraction_synthetic": 0.0,
+            "fraction_augmented": 0.0
         }
     },
 
     "disturbances": {
-        "HiddenGroundRect": [],
         "BoxObstacle": [],
         "BoxObstacle": [],
         "Dust": [100000, 63],
         "Dust": [100000, 127],
         "Dust": [10000, 255],
-        "RandomBrightness": [],
-        "RandomClipMax": [],
-        "RandomClipMax": [],
+        "RandomClipMax": [1, 5],
+        "RandomClipMax": [1, 5],
         "DrunkDriving": []
     }
 }

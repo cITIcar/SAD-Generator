@@ -36,6 +36,8 @@ def generate_synthetic(config, splitname, output_idcs):
     annotations_base_path = config["paths"]["annotations_output_path"].format(splitname=splitname)
     image_pattern = config["paths"]["output_file_pattern"]
 
+    writer = cv2.VideoWriter('output.avi', cv2.VideoWriter_fourcc('M','J','P','G'), 30, (640 * 2, 480))
+
     idx = 0
     running = True
     while running:
@@ -50,9 +52,12 @@ def generate_synthetic(config, splitname, output_idcs):
             perspective_segment = perspective_segment.astype(np.uint8)
 
             if config["debug"]:
-                cv2.imshow(f"nice {splitname}", perspective_nice)
-                cv2.imshow(f"segment {splitname}", perspective_segment)
-                cv2.waitKey(0)
+                both = np.hstack([perspective_nice, perspective_segment])
+                color = cv2.cvtColor(both, cv2.COLOR_GRAY2BGR)
+                writer.write(color)
+#                cv2.imshow(f"nice {splitname}", both)
+#                cv2.imshow(f"segment {splitname}", perspective_segment)
+#                cv2.waitKey(0)
             else:
                 cv2.imwrite(images_base_path + "/" + image_pattern.format(idx=output_idcs[idx]), perspective_nice)
                 cv2.imwrite(annotations_base_path + "/" + image_pattern.format(idx=output_idcs[idx]), perspective_segment)
@@ -64,6 +69,9 @@ def generate_synthetic(config, splitname, output_idcs):
 
         if running:
             print(f"\033[1A\033[K{len(drive_points) / (time.time() - t1):.5} fps")
+
+    writer.release()
+    exit()
 
 
 def generate_augmented(config, splitname, output_idcs):

@@ -23,7 +23,7 @@
 
     "splits": {
         "train_split": {
-            "size": 300,
+            "size": 10000,
             "fraction_synthetic": 0.5,
             "fraction_augmented": 0.5
         },
