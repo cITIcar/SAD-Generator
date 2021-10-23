@@ -60,14 +60,23 @@ The full reference is available in [CONFIG.md](CONFIG.md).
 
 ### chunks
 For synthetic image creation the `chunk` folder is used to dynamically create and annotate a ground plane
-from the funamental building blocks `curve_left`, `curve_right`, `line` and `intersection`.
+from the fundamental building blocks `curve_left`, `curve_right`, `line` and `intersection`.
 The additional JSON files define the driving path of the simulated vehicle along the road.
 Each of the chunk type may have several variants that use the same segmentation map. While running a random variant
 chosen for each new segment.
 
-### white_box
-TODO
+<img width="50%" src="https://user-images.githubusercontent.com/88937076/138558644-222a3bcd-ea1d-46ec-918f-5033dd79b3ef.png"></img>
 
+### overlays
+
+Images in this folder are randomly added to the camera images to enhance their variety. They serve as disturbing artefacts and do not affect the annotations of the images.   
+Further disurbing images may be inserted here.
+
+### white_box
+
+Images in this folder are added to the camera images and the annotations using the `obstacle_class` defined in the config file.  
+They represent objects that have to be classified by the network.  
+In our example the objects are obstacles.
 
 ### disturbances
 The generator is capable of creating various disturbing factors.
