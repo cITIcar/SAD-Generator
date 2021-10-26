@@ -43,7 +43,7 @@ def generate_synthetic(config, splitname, output_idcs):
         image, image_segment, drive_points, _, camera_angles = road_generator.build_road()
         renderer.update_ground_plane(image, image_segment, objects)
 
-        for point, angle in zip(drive_points, camera_angles):
+        for p_idx, (point, angle) in enumerate(zip(drive_points, camera_angles)):
             renderer.update_position(point, angle)
             perspective_nice, perspective_segment = renderer.render_images()
             perspective_nice = np.clip(perspective_nice, 0, 255).astype(np.uint8)
@@ -62,8 +62,7 @@ def generate_synthetic(config, splitname, output_idcs):
                 break
             idx += 1
 
-        if running:
-            print(f"\033[1A\033[K{len(drive_points) / (time.time() - t1):.5} fps, {idx + 1}/{len(output_idcs)}")
+        print(f"\033[1A\033[K{p_idx / (time.time() - t1):.5} fps, {idx + 1}/{len(output_idcs)}")
 
 
 def generate_augmented(config, splitname, output_idcs):
