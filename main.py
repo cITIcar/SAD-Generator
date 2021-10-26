@@ -36,8 +36,6 @@ def generate_synthetic(config, splitname, output_idcs):
     annotations_base_path = config["paths"]["annotations_output_path"].format(splitname=splitname)
     image_pattern = config["paths"]["output_file_pattern"]
 
-    writer = cv2.VideoWriter('output.avi', cv2.VideoWriter_fourcc('M','J','P','G'), 30, (640 * 2, 480))
-
     idx = 0
     running = True
     while running:
@@ -52,12 +50,9 @@ def generate_synthetic(config, splitname, output_idcs):
             perspective_segment = perspective_segment.astype(np.uint8)
 
             if config["debug"]:
-                both = np.hstack([perspective_nice, perspective_segment])
-                color = cv2.cvtColor(both, cv2.COLOR_GRAY2BGR)
-                writer.write(color)
-#                cv2.imshow(f"nice {splitname}", both)
-#                cv2.imshow(f"segment {splitname}", perspective_segment)
-#                cv2.waitKey(0)
+                cv2.imshow(f"nice {splitname}", perspective_nice)
+                cv2.imshow(f"segment {splitname}", perspective_segment)
+                cv2.waitKey(1)
             else:
                 cv2.imwrite(images_base_path + "/" + image_pattern.format(idx=output_idcs[idx]), perspective_nice)
                 cv2.imwrite(annotations_base_path + "/" + image_pattern.format(idx=output_idcs[idx]), perspective_segment)
@@ -68,10 +63,7 @@ def generate_synthetic(config, splitname, output_idcs):
             idx += 1
 
         if running:
-            print(f"\033[1A\033[K{len(drive_points) / (time.time() - t1):.5} fps")
-
-    writer.release()
-    exit()
+            print(f"\033[1A\033[K{len(drive_points) / (time.time() - t1):.5} fps, {idx + 1}/{len(output_idcs)}")
 
 
 def generate_augmented(config, splitname, output_idcs):
@@ -83,7 +75,7 @@ def generate_augmented(config, splitname, output_idcs):
     image_pattern = config["paths"]["output_file_pattern"]
 
     augment.augment_dataset(
-        annotations_input_path, images_input_path, 
+        annotations_input_path, images_input_path,
         annotations_base_path, images_base_path, output_idcs, config)
 
 
@@ -108,61 +100,30 @@ if __name__ == "__main__":
         random.seed(config["seed"])
         np.random.seed(config["seed"])
 
-    init_paths(config)
+    output_path_annotations = config["paths"]["annotations_output_path"]
+    output_path_images = config["paths"]["images_output_path"]
 
-    idcs_train = list(range(config["splits"]["train_split"]["size"]))
-    idcs_validation = list(range(config["splits"]["validation_split"]["size"]))
-    idcs_test = list(range(config["splits"]["test_split"]["size"]))
+    for name, split in config["splits"].items():
+        os.makedirs(output_path_annotations.format(splitname=name), exist_ok=True)
+        os.makedirs(output_path_images.format(splitname=name), exist_ok=True)
+        print("generating split", name)
+        print("synthetic")
+        print()
+        idcs = list(range(split["size"]))
+        if config["shuffle"]:
+            random.shuffle(idcs)
+        generate_synthetic(
+            config,
+            name,
+            idcs[round(
+                (1 - split["fraction_synthetic"]) *
+                split["size"]):])
 
-    if config["shuffle"]:
-        random.shuffle(idcs_train)
-        random.shuffle(idcs_validation)
-        random.shuffle(idcs_test)
-
-    print("generating synthetic:")
-    print("train split\n")
-    generate_synthetic(
-        config,
-        "train_split",
-        idcs_train[round(
-            (1 - config["splits"]["train_split"]["fraction_synthetic"]) *
-            config["splits"]["train_split"]["size"]):])
-    print("validation split\n")
-    generate_synthetic(
-        config,
-        "validation_split",
-        idcs_validation[round(
-            (1 - config["splits"]["validation_split"]["fraction_synthetic"]) *
-            config["splits"]["validation_split"]["size"]):])
-    print("test split\n")
-    generate_synthetic(
-        config,
-        "test_split",
-        idcs_test[round(
-            (1 - config["splits"]["test_split"]["fraction_synthetic"]) *
-            config["splits"]["test_split"]["size"]):])
-
-    print("generating augmented:")
-    print("train split")
-    generate_augmented(
-        config,
-        "train_split",
-        idcs_train[:round(
-            config["splits"]["train_split"]["fraction_augmented"] *
-            config["splits"]["train_split"]["size"])])
-    print("validation split")
-    generate_augmented(
-        config,
-        "validation_split",
-        idcs_validation[:round(
-            config["splits"]["validation_split"]["fraction_augmented"] *
-            config["splits"]["validation_split"]["size"])])
-    print("test split")
-    generate_augmented(
-        config,
-        "test_split",
-        idcs_test[:round(
-            config["splits"]["test_split"]["fraction_augmented"] *
-            config["splits"]["test_split"]["size"])])
-
+        print("augmented")
+        generate_augmented(
+            config,
+            name,
+            idcs[:round(
+                split["fraction_augmented"] *
+                split["size"])])
 

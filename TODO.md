@@ -1,4 +1,3 @@
 - README.md
 - fix global reflection?
 - cite paper
-- datasplits dynamic
