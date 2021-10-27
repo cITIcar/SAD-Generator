@@ -54,33 +54,26 @@ For debugging purposes the switch `--debug` may be used to display the video str
 ## Configuration
 
 ### JSON Config File
-JSON configuration files are used for most of the configuration.
 
+JSON configuration files are used for most of the configuration.
 The full reference is available in [CONFIG.md](CONFIG.md).
 
 ### chunks
-For synthetic image creation the `chunk` folder is used to dynamically create and annotate a ground plane
-from the fundamental building blocks `curve_left`, `curve_right`, `line` and `intersection`.
-The additional JSON files define the driving path of the simulated vehicle along the road.
-Each of the chunk type may have several variants that use the same segmentation map. While running a random variant
-chosen for each new segment.
 
-This figure shows how the ground plane is modularly constructed by chunks.
+The data generator picks the basic building blocks (chunks) `curve_left`, `curve_right`, `line` and `intersection` the folder `chunks` to dynamically create and annotate a ground plane. There are four different chunk types: `curve_left`, `curve_right`, `line` and `intersection`. For every chunk type there has to exist exactly one label and at least one image. If multiple images exist for one type they would be called variants of the chunk. The label contains the semantic information of the chunk. The image is the visual appearance of the road element. Every chunk type has a correspondant JSON file with its metadata. One important metainformation is the ideal path that the car would take through the chunk.
+
+This figure shows how the ground plane is modularly constructed from chunks.
 <img width="50%" src="https://user-images.githubusercontent.com/88937076/138558644-222a3bcd-ea1d-46ec-918f-5033dd79b3ef.png"></img>
 
-In our example the chunks represent the building blocks of a miniature track for a model car. By changing the chunk images, one can adapt the data generator to their own self-driving task. Every chunk has its annotation. 
-The chunk images need a consistent scale, size which has to be defined in the [config](CONFIG.md). Additionally the images have to be undistorted and in the bird's-eye-view.
+In our example the chunks represent the building blocks of a miniature track for a model car. By changing the chunk images, one can adapt the data generator to their own self-driving task. The chunk images need a consistent scale and size which has to be defined in the [config](CONFIG.md). Additionally the images have to be undistorted and in the bird's-eye-view.
 
 ### overlays
 
-Images in this folder are randomly added to the camera images to enhance their variety. They serve as disturbing artefacts and do not affect the annotations of the images.   
-Further disurbing images may be inserted here.
+Overlays are random distracting images which the data generator puts on the camera image to enhance the variety of the dataset. They serve as disturbing artefacts and do not affect the annotations of the images because they do not belong to a segmentation class. The user can add his own overlays inside the folder `overlays`.
 
 ### white_box
 
-Images in this folder are added to the camera images and the annotations using the `obstacle_class` defined in the config file.  
-They represent objects that have to be classified by the network.  
-In our example the objects are obstacles.
+The images in this folder are added to the camera images and the annotations using the `obstacle_class` defined in the config file. Compared to the overlays, they do affect the annotations of the images because they do belong to a segmentation class. Therefor they represent objects that have to be classified by the network.  In our example the objects are obstacles.
 
 ### disturbances
 The generator is capable of creating various disturbing factors.
@@ -98,7 +91,7 @@ Since there is a class associated with an obstacle, it is rendered both in the c
 
 #### Adding a new Disturbance
 
-Each disturbance needs to inherit the class `Disturbance` defined in `disturbances/disturbance.py`.  
+Each disturbance needs to inherit from the class `Disturbance` defined in `disturbances/disturbance.py`.  
 A new class may then overwrite one or more of the methods `pre_transform_step`, `post_transform_step` and `update_position_step`.  
 
 The `pre_transform_step` is applied whenever the ground plane is updated in the renderer.  
@@ -107,14 +100,14 @@ In this step a reference to the global ground plane both segmented and real is p
 `post_transform_step` is applied after the ground plane has been rendered into the image. This step may be used to apply effects to the camera image, like changes in contrast or brightness or to render in objects using `renderer.project_point`.  
 The parameters passed to this method are:
 
-- `image`: The camera image.
-- `image_segment`: The segmentation image.
-- `point`: The current position of the vehicle.
-- `angle` The current angle of the vehicle relative to the current ground plane.
-- `bird_to_camera_nice`: The homography matrix to transform the ground plane according to the current position for the camera. 
-- `bird_to_camera_segment`: The homography matrix to transform the ground plane for the segmentation image.
-- `renderer`: A reference to the renderer object.
+- `image`: the camera image
+- `image_segment`: the segmentation image
+- `point`: the current position of the vehicle
+- `angle` the current angle of the vehicle relative to the current ground plane
+- `bird_to_camera_nice`: the homography matrix to transform the ground plane according to the current position for the camera
+- `bird_to_camera_segment`: the homography matrix to transform the ground plane for the segmentation image
+- `renderer`: a reference to the renderer object
 
-The `update_position_step` is called whenever the position of the vehicle is updated. It receives the current position and angle and is expected to return both as a tuple, making it possible to modify the drive path defined in the chunk JSON files.
+The `update_position_step` is called whenever the position of the vehicle is updated. It receives the current position and angle of the car and is expected to return both as a tuple, making it possible to modify the drive path defined in the chunk JSON files.
 
 Finally, the class field `ordering` is used to determine the rendering order. It is used both for the order of the `pre_transform_step` and the `post_transform_step`, but can be modified in between. For rendering objects this value should be set in the `pre_transform_step` to the distance of the object to the camera.
