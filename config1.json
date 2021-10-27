@@ -34,8 +34,8 @@
         },
         "test_split": {
             "size": 300,
-            "fraction_synthetic": 0.5,
-            "fraction_augmented": 0.5
+            "fraction_synthetic": 0,
+            "fraction_augmented": 1
         }
     },
 
