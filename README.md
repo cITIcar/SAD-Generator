@@ -60,20 +60,20 @@ The full reference is available in [CONFIG.md](CONFIG.md).
 
 ### chunks
 
-The data generator picks the basic building blocks (chunks) `curve_left`, `curve_right`, `line` and `intersection` the folder `chunks` to dynamically create and annotate a ground plane. There are four different chunk types: `curve_left`, `curve_right`, `line` and `intersection`. For every chunk type there has to exist exactly one label and at least one image. If multiple images exist for one type they would be called variants of the chunk. The label contains the semantic information of the chunk. The image is the visual appearance of the road element. Every chunk type has a correspondant JSON file with its metadata. One important metainformation is the ideal path that the car would take through the chunk.
+The data generator picks the basic building blocks (chunks) from the folder `chunks` to dynamically create and annotate a ground plane. There are four different chunk types: `curve_left`, `curve_right`, `line` and `intersection`. For every chunk type there has to exist exactly one label and at least one image. If multiple images exist for one type they would be called variants of the chunk. The label contains the semantic information of the chunk. The image is the visual appearance of the road element. Every chunk type has a correspondant JSON file with its metadata. One important metainformation is the ideal path that the car would take through the chunk.
 
 This figure shows how the ground plane is modularly constructed from chunks.
 <img width="50%" src="https://user-images.githubusercontent.com/88937076/138558644-222a3bcd-ea1d-46ec-918f-5033dd79b3ef.png"></img>
 
-In our example the chunks represent the building blocks of a miniature track for a model car. By changing the chunk images, one can adapt the data generator to their own self-driving task. The chunk images need a consistent scale and size which has to be defined in the [config](CONFIG.md). Additionally the images have to be undistorted and in the bird's-eye-view.
+In our example the chunks represent the building blocks of a miniature track for a model car. By changing the chunk images, one can adapt the data generator to their own self-driving task. The chunk images need a consistent scale and size which has to be defined in the [config](CONFIG.md). Additionally the images have to be in the bird's-eye-view.
 
 ### overlays
 
-Overlays are random distracting images which the data generator puts on the camera image to enhance the variety of the dataset. They serve as disturbing artefacts and do not affect the annotations of the images because they do not belong to a segmentation class. The user can add his own overlays inside the folder `overlays`.
+Overlays are random distracting images which the data generator puts on the camera image to enhance the variety of the dataset. They serve as disturbing artefacts and do not affect the annotations of the images because they do not belong to a segmentation class. The user can add their own overlays inside the folder `overlays`.
 
 ### white_box
 
-The images in this folder are added to the camera images and the annotations using the `obstacle_class` defined in the config file. Compared to the overlays, they do affect the annotations of the images because they do belong to a segmentation class. Therefor they represent objects that have to be classified by the network.  In our example the objects are obstacles.
+The images in this folder are added to the camera images and the annotations using the `obstacle_class` defined in the config file. Compared to the overlays, they do affect the annotations of the images because they do belong to a segmentation class. Therefore they represent objects that have to be classified by the network.  In our example the objects are obstacles.
 
 ### disturbances
 The generator is capable of creating various disturbing factors.
