@@ -1,5 +1,5 @@
 
-# Data Generator
+# SAD - Synthetic Augmented Data Generator
 
 This repository contains code to easily generate synthetic datasets or augment manually annotated real world datasets.
 
