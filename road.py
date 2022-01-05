@@ -27,17 +27,17 @@ class Road:
         self.chunk_json = {}
 
         for segment_type in [ "line", "intersection", "curve_left", "curve_right" ]:
-            segment = cv.imread(f"chunks/{segment_type}_segment.png", cv.IMREAD_GRAYSCALE)
-            self.images[segment_type] = {
-                "nice": [],
-                "segment": {
+            self.images[segment_type] = { "segment": [], "nice": [] }
+            for variant in glob.glob(f"chunks/{segment_type}_segment*.png"):
+                segment = cv.imread(variant, cv.IMREAD_GRAYSCALE)
+
+                self.images[segment_type]["segment"].append({
                     0: segment,
                     90: cv.rotate(segment, cv.ROTATE_90_COUNTERCLOCKWISE),
                     -180: cv.rotate(segment, cv.ROTATE_180),
                     180: cv.rotate(segment, cv.ROTATE_180),
                     -90: cv.rotate(segment, cv.ROTATE_90_CLOCKWISE),
-                }
-            }
+                })
 
             with open(f"chunks/{segment_type}.json") as f:
                 self.chunk_json[segment_type] = json.load(f)
@@ -303,15 +303,15 @@ class Road:
             # Importiere die chunk-Bilder und das JSON-file
             # Lese des Gesamtwinkel aller vorherigen chunks
             angle = - total_degree_list[i] if i > 0 else 0
+            variant_idx = np.random.randint(0, len(self.images[file]["nice"]))
 
-            
             if file == "intersection" and bool(random.getrandbits(1)):
                 # Wichtig: Falls die Haltelinie nicht im Weg ist, muss das segmentierte Bild der Gerade verwendet werden.
-                img_nice = random.choice(self.images[file]["nice"])[int(angle + 90) if angle < 180 else int(angle - 90)]
-                img_segment = self.images["line"]["segment"][angle]
+                img_nice = self.images[file]["nice"][variant_idx][int(angle + 90) if angle < 180 else int(angle - 90)]
+                img_segment = self.images["line"]["segment"][variant_idx][angle]
             else:
-                img_nice = random.choice(self.images[file]["nice"])[angle]
-                img_segment = self.images[file]["segment"][angle]        
+                img_nice = self.images[file]["nice"][variant_idx][angle]
+                img_segment = self.images[file]["segment"][variant_idx][angle]        
 
             # Jeder chunk wird entsprechend dem Winkel und der Position seiner Vorgänger platziert
             [v_1, v_2, h_1, h_2] = coords_list[i]
