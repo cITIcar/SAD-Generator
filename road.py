@@ -28,7 +28,7 @@ class Road:
 
         for segment_type in [ "line", "intersection", "curve_left", "curve_right" ]:
             self.images[segment_type] = { "segment": [], "nice": [] }
-            for variant in glob.glob(f"chunks/{segment_type}_segment*.png"):
+            for variant in sorted(glob.glob(f"chunks/{segment_type}_segment*.png")):
                 segment = cv.imread(variant, cv.IMREAD_GRAYSCALE)
 
                 self.images[segment_type]["segment"].append({
@@ -47,7 +47,7 @@ class Road:
                 self.config["paths"]["chunk_file_pattern"]
             ).format(chunk_type=segment_type + "_nice", variant="*")
 
-            for variant in glob.glob(path_pattern):
+            for variant in sorted(glob.glob(path_pattern)):
                 nice = cv.imread(variant, cv.IMREAD_GRAYSCALE)
                 
                 self.images[segment_type]["nice"].append({
@@ -305,13 +305,8 @@ class Road:
             angle = - total_degree_list[i] if i > 0 else 0
             variant_idx = np.random.randint(0, len(self.images[file]["nice"]))
 
-            if file == "intersection" and bool(random.getrandbits(1)):
-                # Wichtig: Falls die Haltelinie nicht im Weg ist, muss das segmentierte Bild der Gerade verwendet werden.
-                img_nice = self.images[file]["nice"][variant_idx][int(angle + 90) if angle < 180 else int(angle - 90)]
-                img_segment = self.images["line"]["segment"][variant_idx][angle]
-            else:
-                img_nice = self.images[file]["nice"][variant_idx][angle]
-                img_segment = self.images[file]["segment"][variant_idx][angle]        
+            img_nice = self.images[file]["nice"][variant_idx][angle]
+            img_segment = self.images[file]["segment"][variant_idx][angle]        
 
             # Jeder chunk wird entsprechend dem Winkel und der Position seiner Vorgänger platziert
             [v_1, v_2, h_1, h_2] = coords_list[i]
