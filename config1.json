@@ -31,24 +31,19 @@
             "size": 300,
             "fraction_synthetic": 0.5,
             "fraction_augmented": 0.5
-        },
-        "test_split": {
-            "size": 300,
-            "fraction_synthetic": 0,
-            "fraction_augmented": 1
         }
     },
 
-    "disturbances": {
-        "HiddenGroundRect": [],
-        "BoxObstacle": [],
-        "BoxObstacle": [],
-        "Dust": [100000, 63],
-        "Dust": [100000, 127],
-        "Dust": [10000, 255],
-        "RandomBrightness": [],
-        "RandomClipMax": [],
-        "RandomClipMax": [],
-        "DrunkDriving": []
-    }
+    "disturbances": [
+        { "HiddenGroundRect": [] },
+        { "BoxObstacle": [] },
+        { "BoxObstacle": [] },
+        { "Dust": [100000, 63] },
+        { "Dust": [100000, 127] },
+        { "Dust": [10000, 255] },
+        { "RandomBrightness": [] },
+        { "RandomClipMax": [] },
+        { "RandomClipMax": [] },
+        { "DrunkDriving": [] }
+    ]
 }

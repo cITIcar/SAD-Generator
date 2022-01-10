@@ -27,10 +27,11 @@ def generate_synthetic(config, splitname, output_idcs):
     road_generator = road.Road(config)
     renderer = render.Renderer(config)
 
-    # initialize disturbances from the config file
-    objects = [
-        globals()[obj](*params, config=config)
-        for obj, params in config["disturbances"].items() ]
+    # instantiate disturbances
+    objects = []
+    for d in config["disturbances"]:
+        (obj, params), = list(d.items())
+        objects.append(globals()[obj](*params, config=config))
 
     images_base_path = config["paths"]["images_output_path"].format(splitname=splitname)
     annotations_base_path = config["paths"]["annotations_output_path"].format(splitname=splitname)
