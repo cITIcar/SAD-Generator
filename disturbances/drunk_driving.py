@@ -4,13 +4,14 @@ import numpy as np
 from . import disturbance
 
 class DrunkDriving(disturbance.Disturbance):
-    def __init__(self, frequency_from=1, frequency_to=4, max_error_x=200, max_error_y=100, max_error_angle=np.pi / 2, **kwargs):
+    def __init__(self, x_offset=0, frequency_from=1, frequency_to=4, max_error_x=200, max_error_y=100, max_error_angle=np.pi / 3, **kwargs):
         self.frequency_from = frequency_from
         self.frequency_to = frequency_to
         self.max_error_x = max_error_x
         self.max_error_y = max_error_y
         self.max_error_angle = max_error_angle
         self.idx = 0
+        self.x_offset = x_offset
         self.new_drive_curve()
 
 
@@ -19,8 +20,8 @@ class DrunkDriving(disturbance.Disturbance):
         frequency_y = np.random.randint(self.frequency_from, self.frequency_to)
         frequency_angle = np.random.randint(self.frequency_from, self.frequency_to)
 
-        error_x = np.random.randint(0, self.max_error_x)
-        error_y = np.random.randint(0, self.max_error_y)
+        error_x = np.random.randint(0, self.max_error_x) if self.max_error_x else 0
+        error_y = np.random.randint(0, self.max_error_y) if self.max_error_y else 0
         error_angle = np.random.random() * (self.max_error_angle * 2) - self.max_error_angle
 
         self.drive_curve_x = np.sin(np.linspace(0, np.pi * 2 * frequency_x, 100)) * error_x
@@ -29,7 +30,7 @@ class DrunkDriving(disturbance.Disturbance):
 
 
     def update_position_step(self, position, angle, **kwargs):
-        error_x = self.drive_curve_x[self.idx]
+        error_x = self.drive_curve_x[self.idx] + self.x_offset
         error_y = self.drive_curve_y[self.idx]
         error_angle = self.drive_curve_angle[self.idx]
         self.idx += 1
