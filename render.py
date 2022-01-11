@@ -87,8 +87,8 @@ class Renderer:
     def render_images(self):
         width, height = self.config["output_size"]
         rescale = self.config["rescale"]
-        perspective_camera = cv2.warpPerspective(self.image_real, self.h_camera, (width * rescale, height * rescale), flags=cv2.INTER_NEAREST).astype(np.float32)
-        perspective_segmentation = cv2.warpPerspective(self.image_segmentation, self.h_segmentation, (width, height), flags=cv2.INTER_NEAREST).astype(np.float32)
+        perspective_camera = cv2.warpPerspective(self.image_real, self.h_camera, (width * rescale, height * rescale), flags=cv2.INTER_NEAREST)
+        perspective_segmentation = cv2.warpPerspective(self.image_segmentation, self.h_segmentation, (width, height), flags=cv2.INTER_NEAREST)
 
         perspective_camera[:int(len(perspective_camera) * self.horizon_fraction)] = 0
         perspective_segmentation[:int(len(perspective_segmentation) * self.horizon_fraction)] = 0

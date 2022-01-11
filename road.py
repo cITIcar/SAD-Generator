@@ -32,11 +32,11 @@ class Road:
                 segment = cv.imread(variant, cv.IMREAD_GRAYSCALE)
 
                 self.images[segment_type]["segment"].append({
-                    0: segment,
-                    90: cv.rotate(segment, cv.ROTATE_90_COUNTERCLOCKWISE),
-                    -180: cv.rotate(segment, cv.ROTATE_180),
-                    180: cv.rotate(segment, cv.ROTATE_180),
-                    -90: cv.rotate(segment, cv.ROTATE_90_CLOCKWISE),
+                    0: segment.astype(np.float32),
+                    90: cv.rotate(segment, cv.ROTATE_90_COUNTERCLOCKWISE).astype(np.float32),
+                    -180: cv.rotate(segment, cv.ROTATE_180).astype(np.float32),
+                    180: cv.rotate(segment, cv.ROTATE_180).astype(np.float32),
+                    -90: cv.rotate(segment, cv.ROTATE_90_CLOCKWISE).astype(np.float32),
                 })
 
             with open(f"chunks/{segment_type}.json") as f:
@@ -51,11 +51,11 @@ class Road:
                 nice = cv.imread(variant, cv.IMREAD_GRAYSCALE)
                 
                 self.images[segment_type]["nice"].append({
-                    0: nice,
-                    90: cv.rotate(nice, cv.ROTATE_90_COUNTERCLOCKWISE),
-                    -180: cv.rotate(nice, cv.ROTATE_180),
-                    180: cv.rotate(nice, cv.ROTATE_180),
-                    -90: cv.rotate(nice, cv.ROTATE_90_CLOCKWISE),
+                    0: nice.astype(np.float32),
+                    90: cv.rotate(nice, cv.ROTATE_90_COUNTERCLOCKWISE).astype(np.float32),
+                    -180: cv.rotate(nice, cv.ROTATE_180).astype(np.float32),
+                    180: cv.rotate(nice, cv.ROTATE_180).astype(np.float32),
+                    -90: cv.rotate(nice, cv.ROTATE_90_CLOCKWISE).astype(np.float32),
                 })
 
 
@@ -295,8 +295,8 @@ class Road:
         Output: full_image_nice(Gesamtbild der Straße - der Realität nachgeahmt), full_image_segment(Gesamtbild der Straße - segmentiert)
         """
         # Generiere neues Vollbild
-        full_image_nice  = np.zeros((size_image_vertikal, size_image_horizontal), dtype=np.uint8)
-        full_image_segment = np.zeros((size_image_vertikal, size_image_horizontal))
+        full_image_nice  = np.zeros((size_image_vertikal, size_image_horizontal), dtype=np.float32)
+        full_image_segment = np.zeros((size_image_vertikal, size_image_horizontal), dtype=np.float32)
 
         # Iteriere über alle chunks
         for i, file in enumerate(self.file_list):
