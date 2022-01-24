@@ -14,6 +14,12 @@ from disturbances import *
 import augment
 
 
+# TODO ALle Kommentare auf Englisch
+# TODO Folie über anpassung chunks auf individuelles Problem
+# TODO Hardgecodete Variablen aus Code entfernen
+# TODO Code besser nutzbar machen
+
+
 parser = argparse.ArgumentParser(description="generate training data")
 parser.add_argument(
     "--config", metavar="config file", type=str, required=True,
@@ -24,6 +30,7 @@ parser.add_argument(
 
 
 def generate_synthetic(config, splitname, output_idcs):
+    print(output_idcs) # debug
     road_generator = road.Road(config)
     renderer = render.Renderer(config)
 
@@ -106,10 +113,10 @@ if __name__ == "__main__":
     for name, split in config["splits"].items():
         os.makedirs(output_path_annotations.format(splitname=name), exist_ok=True)
         os.makedirs(output_path_images.format(splitname=name), exist_ok=True)
-        print("generating split", name)
-        print("synthetic")
-        print()
+        print("generating split: ", name)
+
         idcs = list(range(split["size"]))
+
         if config["shuffle"]:
             random.shuffle(idcs)
         generate_synthetic(
@@ -120,6 +127,8 @@ if __name__ == "__main__":
                 split["size"]):])
 
         print("augmented")
+        
+
         generate_augmented(
             config,
             name,

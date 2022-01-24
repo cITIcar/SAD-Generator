@@ -14,26 +14,30 @@
     "paths": {
         "annotations_output_path": "data/annotations/{splitname}/some_set",
         "images_output_path": "data/images/{splitname}/some_set",
-        "manual_annotations_input_path": "real_dataset/annotations",
-        "manual_images_input_path": "real_dataset/images",
+        "manual_annotations_input_path": "real_dataset/annotations/set_*",
+        "manual_images_input_path": "real_dataset/images/set_*",
         "chunk_path": "chunks",
         "chunk_file_pattern": "{chunk_type}_{variant}",
-        "output_file_pattern": "image_{idx}.png"
+        "output_file_pattern": "image_{idx}.jpg"
     },
 
     "splits": {
         "train_split": {
-            "size": 10000,
+            "size": 50,
             "fraction_synthetic": 0.5,
             "fraction_augmented": 0.5
         },
         "validation_split": {
-            "size": 300,
+            "size": 50,
+            "fraction_synthetic": 0.5,
+            "fraction_augmented": 0.5
+        },
+        "test_split": {
+            "size": 50,
             "fraction_synthetic": 0.5,
             "fraction_augmented": 0.5
         }
     },
-
     "disturbances": [
         { "HiddenGroundRect": [] },
         { "BoxObstacle": [] },

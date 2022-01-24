@@ -126,8 +126,8 @@ def add_obstacle(roi_image_nice, roi_image_segment):
 
 
 def augment_dataset(annotations_path, images_path, annotations_output_path, images_output_path, idcs, config):
-    annotations = glob.glob(annotations_path + "/*.png")
-    images = glob.glob(images_path + "/*.png")
+    annotations = glob.glob(annotations_path + "/*.jpg")
+    images = glob.glob(images_path + "/*.jpg")
     if len(annotations) == 0:
         print("no annotated png images found under the path", annotations_path)
         return
@@ -136,12 +136,22 @@ def augment_dataset(annotations_path, images_path, annotations_output_path, imag
         return
 
     index = 0
+    print(len(idcs))
     while index < len(idcs):
-        for mask_path in glob.glob(annotations_path + "/*.png"):
+        print('run loop')
+        
+       
+        
+        for mask_path in glob.glob(annotations_path + "/*.jpg"):
             file_name = os.path.basename(mask_path)
-            image_path = images_path + "/" + file_name
+            image_path = images_path + "/"  + file_name
+
 
             mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+            
+            
+            
+            #TODO Diese Zeile erzeugt den Fehler
             image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
             if mask is None or image is None:
                 print("skipping invalid file")
@@ -184,6 +194,6 @@ def augment_dataset(annotations_path, images_path, annotations_output_path, imag
 
             index = index + 1
 
-            if index >= len(idcs):
+            if index == 5: #>= len(idcs):
                 break
 
