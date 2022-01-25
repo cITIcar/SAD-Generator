@@ -73,7 +73,7 @@ def generate_synthetic(config, splitname, output_idcs):
         print(f"\033[1A\033[K{p_idx / (time.time() - t1):.5} fps, {idx + 1}/{len(output_idcs)}")
 
 
-def generate_augmented(config, splitname, output_idcs):
+def generate_augmented(config, splitname, data_amount):
     annotations_input_path = config["paths"]["manual_annotations_input_path"]
     images_input_path = config["paths"]["manual_images_input_path"]
 
@@ -83,7 +83,7 @@ def generate_augmented(config, splitname, output_idcs):
 
     augment.augment_dataset(
         annotations_input_path, images_input_path,
-        annotations_base_path, images_base_path, output_idcs, config)
+        annotations_base_path, images_base_path, data_amount, config)
 
 
 def init_paths(config):
@@ -117,22 +117,11 @@ if __name__ == "__main__":
 
         idcs = list(range(split["size"]))
 
-        if config["shuffle"]:
+        if config["shuffle"]: 
             random.shuffle(idcs)
-        generate_synthetic(
-            config,
-            name,
-            idcs[round(
-                (1 - split["fraction_synthetic"]) *
-                split["size"]):])
+        generate_synthetic(config, name, idcs[round((1 - split["fraction_synthetic"])*split["size"]):])
 
         print("augmented")
         
-
-        generate_augmented(
-            config,
-            name,
-            idcs[:round(
-                split["fraction_augmented"] *
-                split["size"])])
+        generate_augmented(config, name, split["size"])
 
