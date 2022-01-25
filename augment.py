@@ -90,7 +90,7 @@ def add_overlay(image_nice):
     return image_nice
 
 
-def add_obstacle(roi_image_nice, roi_image_segment):
+def add_obstacle(image, mask, config):
     """
     Diese Funktion soll zufällige Hindernisse auf das schöne Kamerabild applizieren und diese entsprechend in der Etikette als Klasse 4 markieren.
     Input:
@@ -100,7 +100,7 @@ def add_obstacle(roi_image_nice, roi_image_segment):
     image_nice, image_segment
     """
 
-    row,col = roi_image_nice.shape
+    row,col = image.shape
 
     # Wähle ein zufälliges Obstacle aus
     number = random.randint(1,34)
@@ -108,7 +108,7 @@ def add_obstacle(roi_image_nice, roi_image_segment):
 
     # Wähle eine zufällige Größe aus
     height = random.randint(20,40)
-    width = random.randint(30,40)
+    width = random.randint(30,35)
 
     obstacle = cv2.resize(obstacle, (width, height), interpolation = cv2.INTER_LINEAR)
 
@@ -117,15 +117,27 @@ def add_obstacle(roi_image_nice, roi_image_segment):
     y_place = random.randint(0, int(col*0.7) - width)
 
 
-    roi_image_nice[x_place : x_place + height, y_place : y_place + width] = obstacle
-
-    obstacle[obstacle > 50] = 250
-    roi_image_segment[x_place : x_place + height, y_place : y_place + width, 0] = obstacle
-
-    return roi_image_nice, roi_image_segment
+    overlay_mask = obstacle * 0
+    overlay_mask[obstacle > 100] = 1
+    image_mask = 1 - overlay_mask
 
 
-def augment_dataset(annotations_path, images_path, annotations_output_path, images_output_path, idcs, config):
+
+
+    image[x_place : x_place + height, y_place : y_place + width] = overlay_mask * obstacle + image_mask * image[x_place : x_place + height, y_place : y_place + width]
+
+    space = mask[x_place : x_place + height, y_place : y_place + width]
+    space[obstacle > 50] = config["obstacle_class"]
+    mask[x_place : x_place + height, y_place : y_place + width] = space
+                
+                
+    return image, mask
+
+
+
+
+
+def augment_dataset(annotations_path, images_path, annotations_output_path, images_output_path, data_amount, config):
     
     annotations_list = glob.glob(annotations_path + "/*.jpg")
     images_list = glob.glob(images_path + "/*.jpg")
@@ -139,65 +151,35 @@ def augment_dataset(annotations_path, images_path, annotations_output_path, imag
 
     index = 0
     
-    #while index < len(idcs):
-        #print('run loop')
-        
-    #TODO Augmentierung kann über index wiederholt werden
-    
     
     print("run augment")
     
-    for mask_path in annotations_list:
-        image_path = mask_path.replace("annotations", "images")
+    while (index <= data_amount):
+    
+        for mask_path in annotations_list:
+            image_path = mask_path.replace("annotations", "images")
 
-        mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
-        
-        
-        
-        #TODO Diese Zeile erzeugt den Fehler
+            mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+            image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
-        image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+            if mask is None or image is None: # Check if corresponding image exists
+                print("skipping invalid file")
+                continue
 
-        if mask is None or image is None: # Check if corresponding image exists
-            print("skipping invalid file")
-            continue
+            if random.choice([True, False]):
+                image, mask = add_obstacle(image, mask, config)
+            else:
+                image = add_overlay(image)
 
-        if random.choice([True, False]):
-            row, col = image.shape
+            image = add_noise(image, random.randint(0, 30))
 
-            # Wähle ein zufälliges Obstacle aus
-            number = random.randint(1, 34)
-            obstacle = cv2.imread(f"white_box/box_{number}.jpg", cv2.IMREAD_GRAYSCALE) #
+            cv2.imwrite(f"{annotations_output_path}/image_{index}.png", mask)
+            cv2.imwrite(f"{images_output_path}/image_{index}.png", image)
 
-            # Wähle eine zufällige Größe aus
-            height = random.randint(20, 40)
-            width = random.randint(30, 35)
-
-            obstacle = cv2.resize(obstacle, (width, height), interpolation = cv2.INTER_LINEAR)
-
-            # Wähle einen zufälligen Platz für das Overlay
-            x_place = random.randint(0, int(row*0.7) - height)
-            y_place = random.randint(0, int(col*0.7) - width)
-
-            overlay_mask = obstacle * 0
-            overlay_mask[obstacle > 100] = 1
-            image_mask = 1 - overlay_mask
-
-            image[x_place : x_place + height, y_place : y_place + width] = overlay_mask * obstacle + image_mask * image[x_place : x_place + height, y_place : y_place + width]
-
-            space = mask[x_place : x_place + height, y_place : y_place + width]
-            space[obstacle > 50] = config["obstacle_class"]
-            mask[x_place : x_place + height, y_place : y_place + width] = space
-
-        else:
-            image = add_overlay(image)
-
-        image = add_noise(image, random.randint(0, 30))
-
-        cv2.imwrite(f"{annotations_output_path}/image_{index}.png", mask)
-        cv2.imwrite(f"{images_output_path}/image_{index}.png", image)
-
-        index = index + 1
+            index +=1
+            
+            if index >= data_amount:  # End loop after amount of image have been augmented
+                break
 
 
 
