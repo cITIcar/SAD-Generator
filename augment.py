@@ -92,52 +92,43 @@ def add_overlay(image_nice):
 
 def add_obstacle(image, mask, config):
     """
-    Diese Funktion soll zufällige Hindernisse auf das schöne Kamerabild applizieren und diese entsprechend in der Etikette als Klasse 4 markieren.
-    Input:
-    image_nice, image_segment
-
-    Output:
-    image_nice, image_segment
+    This function adds obstacles to the image of the sample and annotates it in the mask.
+    The obstacle is randomly choosen from the dir 'white_box'.
+    
     """
 
     row,col = image.shape
 
-    # Wähle ein zufälliges Obstacle aus
-    number = random.randint(1,34)
-    obstacle = cv2.imread(f"white_box/box_{number}.jpg", cv2.IMREAD_GRAYSCALE) #
+    number = random.randint(1,34) # Choose a random obstacle
+    obstacle = cv2.imread(f"obstacles/box_{number}.jpg", cv2.IMREAD_GRAYSCALE) #
 
-    # Wähle eine zufällige Größe aus
-    height = random.randint(20,40)
+    height = random.randint(20,40) # Choose a random size for the obstacle
     width = random.randint(30,35)
 
     obstacle = cv2.resize(obstacle, (width, height), interpolation = cv2.INTER_LINEAR)
 
-    # Wähle einen zufälligen Platz für das Overlay. Es soll sich nicht zu tief befinden
-    x_place = random.randint(0, int(row*0.7) - height)
+    x_place = random.randint(0, int(row*0.7) - height) # Choose a random location for the obstacle. 
     y_place = random.randint(0, int(col*0.7) - width)
-
 
     overlay_mask = obstacle * 0
     overlay_mask[obstacle > 100] = 1
     image_mask = 1 - overlay_mask
-
-
-
 
     image[x_place : x_place + height, y_place : y_place + width] = overlay_mask * obstacle + image_mask * image[x_place : x_place + height, y_place : y_place + width]
 
     space = mask[x_place : x_place + height, y_place : y_place + width]
     space[obstacle > 50] = config["obstacle_class"]
     mask[x_place : x_place + height, y_place : y_place + width] = space
-                
-                
+                    
     return image, mask
 
 
-
-
-
 def augment_dataset(annotations_path, images_path, annotations_output_path, images_output_path, data_amount, config):
+    """
+    This function gets the path of the real world data, 
+    the location where they have to be saved and the amount of demanded augmented images.
+    It adds obstacles, overlays and noise to the rela world images.
+    """
     
     annotations_list = glob.glob(annotations_path + "/*.jpg")
     images_list = glob.glob(images_path + "/*.jpg")
@@ -150,9 +141,6 @@ def augment_dataset(annotations_path, images_path, annotations_output_path, imag
         return
 
     index = 0
-    
-    
-    print("run augment")
     
     while (index <= data_amount):
     
@@ -170,6 +158,7 @@ def augment_dataset(annotations_path, images_path, annotations_output_path, imag
                 image, mask = add_obstacle(image, mask, config)
             else:
                 image = add_overlay(image)
+
 
             image = add_noise(image, random.randint(0, 30))
 
