@@ -126,74 +126,78 @@ def add_obstacle(roi_image_nice, roi_image_segment):
 
 
 def augment_dataset(annotations_path, images_path, annotations_output_path, images_output_path, idcs, config):
-    annotations = glob.glob(annotations_path + "/*.jpg")
-    images = glob.glob(images_path + "/*.jpg")
-    if len(annotations) == 0:
+    
+    annotations_list = glob.glob(annotations_path + "/*.jpg")
+    images_list = glob.glob(images_path + "/*.jpg")
+
+    if len(annotations_list) == 0:
         print("no annotated png images found under the path", annotations_path)
         return
-    if len(images) == 0:
+    if len(images_list) == 0:
         print("no png images found under the path", annotations_path)
         return
 
     index = 0
-    print(len(idcs))
-    while index < len(idcs):
-        print('run loop')
+    
+    #while index < len(idcs):
+        #print('run loop')
         
-       
+    #TODO Augmentierung kann über index wiederholt werden
+    
+    
+    print("run augment")
+    
+    for mask_path in annotations_list:
+        image_path = mask_path.replace("annotations", "images")
+
+        mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
         
-        for mask_path in glob.glob(annotations_path + "/*.jpg"):
-            file_name = os.path.basename(mask_path)
-            image_path = images_path + "/"  + file_name
+        
+        
+        #TODO Diese Zeile erzeugt den Fehler
+
+        image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+
+        if mask is None or image is None: # Check if corresponding image exists
+            print("skipping invalid file")
+            continue
+
+        if random.choice([True, False]):
+            row, col = image.shape
+
+            # Wähle ein zufälliges Obstacle aus
+            number = random.randint(1, 34)
+            obstacle = cv2.imread(f"white_box/box_{number}.jpg", cv2.IMREAD_GRAYSCALE) #
+
+            # Wähle eine zufällige Größe aus
+            height = random.randint(20, 40)
+            width = random.randint(30, 35)
+
+            obstacle = cv2.resize(obstacle, (width, height), interpolation = cv2.INTER_LINEAR)
+
+            # Wähle einen zufälligen Platz für das Overlay
+            x_place = random.randint(0, int(row*0.7) - height)
+            y_place = random.randint(0, int(col*0.7) - width)
+
+            overlay_mask = obstacle * 0
+            overlay_mask[obstacle > 100] = 1
+            image_mask = 1 - overlay_mask
+
+            image[x_place : x_place + height, y_place : y_place + width] = overlay_mask * obstacle + image_mask * image[x_place : x_place + height, y_place : y_place + width]
+
+            space = mask[x_place : x_place + height, y_place : y_place + width]
+            space[obstacle > 50] = config["obstacle_class"]
+            mask[x_place : x_place + height, y_place : y_place + width] = space
+
+        else:
+            image = add_overlay(image)
+
+        image = add_noise(image, random.randint(0, 30))
+
+        cv2.imwrite(f"{annotations_output_path}/image_{index}.png", mask)
+        cv2.imwrite(f"{images_output_path}/image_{index}.png", image)
+
+        index = index + 1
 
 
-            mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
-            
-            
-            
-            #TODO Diese Zeile erzeugt den Fehler
-            image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-            if mask is None or image is None:
-                print("skipping invalid file")
-                continue
-
-            if random.choice([True, False]):
-                row, col = image.shape
-
-                # Wähle ein zufälliges Obstacle aus
-                number = random.randint(1, 34)
-                obstacle = cv2.imread(f"white_box/box_{number}.jpg", cv2.IMREAD_GRAYSCALE) #
-
-                # Wähle eine zufällige Größe aus
-                height = random.randint(20, 40)
-                width = random.randint(30, 35)
-
-                obstacle = cv2.resize(obstacle, (width, height), interpolation = cv2.INTER_LINEAR)
-
-                # Wähle einen zufälligen Platz für das Overlay
-                x_place = random.randint(0, int(row*0.7) - height)
-                y_place = random.randint(0, int(col*0.7) - width)
-
-                overlay_mask = obstacle * 0
-                overlay_mask[obstacle > 100] = 1
-                image_mask = 1 - overlay_mask
-
-                image[x_place : x_place + height, y_place : y_place + width] = overlay_mask * obstacle + image_mask * image[x_place : x_place + height, y_place : y_place + width]
-
-                space = mask[x_place : x_place + height, y_place : y_place + width]
-                space[obstacle > 50] = config["obstacle_class"]
-                mask[x_place : x_place + height, y_place : y_place + width] = space
-
-            else:
-                image = add_overlay(image)
-
-            image = add_noise(image, random.randint(0, 30))
-
-            cv2.imwrite(f"{annotations_output_path}/image_{idcs[index]}.png", mask)
-            cv2.imwrite(f"{images_output_path}/image_{idcs[index]}.png", image)
-
-            index = index + 1
-
-            if index == 5: #>= len(idcs):
-                break
 
