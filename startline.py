@@ -1,3 +1,10 @@
+"""
+Augmentation of real world images with start lines.
+This GUI allows to transform real world camera images in bird's-eye-view and add
+a start line inside it. After the adding of the startline, the image will be transformed back into 
+camera perspective.
+"""
+
 import numpy as np
 import cv2
 import json
@@ -6,15 +13,25 @@ import config
 import render
 import math
 import glob
+import imutils
 from numpy.linalg import inv
+
+
+class Startline:
 
 with open('config1.json', 'r') as f:
     l=f.read()
 
 config_json = json.loads(l)
 
+translation_step = 25
+scale_step = 25
+rotation_step = 30
 
-
+# Define render objects
+c = config.Config("config1.json", debug=False)
+r = render.Renderer(c)
+r.update_position((1400, 0), math.pi)
 
 # Create Startline
 start_line_rows = config_json["start_line_rows"]
@@ -46,8 +63,8 @@ cv2.destroyAllWindows()
 
 
 angle = 0
-offset_x = 0
-offset_y = 0
+offset_x = 1000
+offset_y = 1000
 scale = 1
 k = 0
 forward = False
@@ -65,11 +82,13 @@ for mask_path in annotations_list:
     camera_mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
     camera_image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
-    # Define render objects
-    c = config.Config("config1.json", debug=False)
-    r = render.Renderer(c)
-    r.update_position((1400, 0), math.pi)
 
+    zeros_image = np.zeros((3000, 3000))
+    zeros_mask = np.zeros((3000, 3000))
+
+    zeros_image[offset_x:offset_x+patch_size*start_line_rows, offset_y:offset_y+patch_size*start_line_colums] = start_line_image
+    zeros_mask[offset_x:offset_x+patch_size*start_line_rows, offset_y:offset_y+patch_size*start_line_colums] = 250
+    
     interpolation = cv2.INTER_LINEAR  # cv2.INTER_NEAREST
 
     # Transform to bird's eye view
@@ -82,71 +101,80 @@ for mask_path in annotations_list:
     bird_mask = cv2.warpPerspective(zeros_1_large, inv(r.h_segmentation), (3000, 3000), flags=interpolation)
     bird_image = cv2.warpPerspective(zeros_2_large, inv(r.h_segmentation), (3000, 3000), flags=interpolation)
 
-    # Insert Startline
-    # Arrowkey translate startline
-    # a/d rotate startline
-    # w/s scale startline
-    
-    print(k)
-    if():
-        scale += 0.1
-        start_line_image = cv2.resize(start_line_image, (patch_size*start_line_rows*scale, patch_size*start_line_colums*scale), interpolation = interpolation)
-        start_line_mask = cv2.resize(start_line_mask, (patch_size*start_line_rows*scale, patch_size*start_line_colums*scale), interpolation = interpolation)
-    elif():
-        scale -= 0.1
-        start_line_image = cv2.resize(start_line_image, (patch_size*start_line_rows*scale, patch_size*start_line_colums*scale), interpolation = interpolation)
-        start_line_mask = cv2.resize(start_line_mask, (patch_size*start_line_rows*scale, patch_size*start_line_colums*scale), interpolation = interpolation)
+
+    while(True):
+
+        if(k == ord("x")):
+            zeros_image = imutils.translate(zeros_image, (translation_step, 0))
+            zeros_mask = imutils.translate(zeros_mask, (translation_step, 0))
+
+        elif(k == ord("y")):
+            zeros_image = imutils.translate(zeros_image, (-translation_step, 0))
+            zeros_mask = imutils.translate(zeros_mask, (-translation_step, 0))
+
+            
+        if(k == ord("d")):
+            zeros_image = imutils.translate(zeros_image, (0, translation_step))
+            zeros_mask = imutils.translate(zeros_mask, (0, translation_step))
+            
+        elif(k == ord("a")):
+            zeros_image = imutils.translate(zeros_image, (0, -translation_step))
+            zeros_mask = imutils.translate(zeros_mask, (0, -translation_step))
+            
+        if(k == ord("w")):
+            
+            pass
+            
+        elif(k == ord("s")):
+            
+            pass
+
+        if(k == ord("r")):
+            zeros_image = imutils.rotate(zeros_image, rotation_step)
+            zeros_mask = imutils.rotate(zeros_mask, rotation_step)
+
+            
+        elif(k == ord("e")):
+            zeros_image = imutils.rotate(zeros_image, -rotation_step)
+            zeros_mask = imutils.rotate(zeros_mask, -rotation_step)
+
+
         
-    if():
-        offset_x += 5
+
+        # Transform to camera view
+        result_camera_mask_large = cv2.warpPerspective(zeros_mask, r.h_segmentation, (640, 480), flags=interpolation)
+        result_camera_image_large = cv2.warpPerspective(zeros_image, r.h_segmentation, (640, 480), flags=interpolation)
+        result_camera_mask = cv2.resize(result_camera_mask_large, (128, 128), interpolation = interpolation)
+        result_camera_image = cv2.resize(result_camera_image_large, (128, 128), interpolation = interpolation)
+        result_camera_mask = result_camera_mask[64:128, :]
+        result_camera_image = result_camera_image[64:128, :]
+
         
-    elif():
-        offset_x -= 5
-        
-    if():
-        offset_y += 5
-        
-    elif():
-        offset_y -= 5
+        bird_mask_clipped = np.clip(bird_mask + zeros_mask, 0, 255)
+        bird_image_clipped = np.clip(bird_image + zeros_image, 0, 255)
 
-    if():
-        angle += 5
-        
-    elif():
-        angle -= 5
+        bird_mask_resized = cv2.resize(bird_mask_clipped, (1000, 1000), interpolation = interpolation)
+        bird_image_resized = cv2.resize(bird_image_clipped, (1000, 1000), interpolation = interpolation)
+        bird_mask_half = bird_mask_resized[0:500, :]
+        bird_image_half = bird_image_resized[0:500, :]
 
+        result_camera_mask = cv2.resize(result_camera_mask, (1000, 500), interpolation = interpolation)
+        result_camera_image = cv2.resize(result_camera_image, (1000, 500), interpolation = interpolation)
 
-    # Transform to camera view
-    result_camera_mask_large = cv2.warpPerspective(bird_mask, r.h_segmentation, (640, 480), flags=interpolation)
-    result_camera_image_large = cv2.warpPerspective(bird_image, r.h_segmentation, (640, 480), flags=interpolation)
-    result_camera_mask = cv2.resize(result_camera_mask_large, (128, 128), interpolation = interpolation)
-    result_camera_image = cv2.resize(result_camera_image_large, (128, 128), interpolation = interpolation)
-    result_camera_mask = result_camera_mask[64:128, :]
-    result_camera_image = result_camera_image[64:128, :]
+        result_mask = np.concatenate([bird_mask_half, result_camera_mask], axis=0)
+        result_image = np.concatenate([bird_image_half, result_camera_image], axis=0)
+        result = np.concatenate([result_mask, result_image], axis=1)
 
-    bird_mask = cv2.resize(bird_mask, (1000, 1000), interpolation = interpolation)
-    bird_image = cv2.resize(bird_image, (1000, 1000), interpolation = interpolation)
-    bird_mask = bird_mask[0:500, :]
-    bird_image = bird_image[0:500, :]
+        cv2.imshow("result", result.astype(np.uint8))
 
-    result_camera_mask = cv2.resize(result_camera_mask, (1000, 500), interpolation = interpolation)
-    result_camera_image = cv2.resize(result_camera_image, (1000, 500), interpolation = interpolation)
+        while True:
+            k = cv2.waitKey(0)
+            if k == 27:
+                break    
+            if k == ord(" "):
+                exit()
+            
 
-    result_mask = np.concatenate([bird_mask, result_camera_mask], axis=0)
-    result_image = np.concatenate([bird_image, result_camera_image], axis=0)
-    result = np.concatenate([result_mask, result_image], axis=1)
-
-    cv2.imshow("result", result.astype(np.uint8))
-
-    k = cv2.waitKey(0)
-    if k == 27:
-        break
-
-    while forward == False:
-        k = cv2.waitKey(0)
-        if k == 27:
-            forward = True
-    
 cv2.destroyAllWindows()
 
     
@@ -209,5 +237,6 @@ if False:
     bird_view = cv2.warpPerspective(zeros, inv(r.h_segmentation), (2000, 2000), flags=cv2.INTER_NEAREST)
     cv2.imwrite('./bird.png', bird_view)
 
-    
+if __name__ == "__main__":
+   
     
