@@ -213,10 +213,11 @@ class Startline:
 
 if __name__ == "__main__":
 
-    with open('config1.json', 'r') as f:
-        l = f.read()
+    # TODO Overlay annotation only over road and not over background
 
-    config_json = json.loads(l)
+    with open('config1.json', 'r') as f:
+        json_file = f.read()
+    config_json = json.loads(json_file)
 
     translation_step = 25
     scale_step = 25
@@ -245,7 +246,7 @@ if __name__ == "__main__":
     annotations_list = glob.glob("./real_dataset/annotations/set_*/*.jpg")
 
     if len(annotations_list) == 0:
-        print("no annotated images found under the path", annotations_path)
+        print("no annotated images found under the path")
 
     for mask_path in annotations_list:
         image_path = mask_path.replace("annotations", "images")
@@ -257,8 +258,10 @@ if __name__ == "__main__":
         zeros_image = np.zeros((3000, 3000))
         zeros_mask = np.zeros((3000, 3000))
 
-        zeros_image[offset_x:offset_x+patch_size*start_line_rows,
-                    offset_y:offset_y+patch_size*start_line_colums] = start_line_image
+        zeros_image[offset_x:
+                    offset_x + patch_size*start_line_rows,
+                    offset_y:
+                    offset_y + patch_size*start_line_colums] = start_line_image
         zeros_mask[offset_x:offset_x+patch_size*start_line_rows,
                    offset_y:offset_y+patch_size*start_line_colums] = 250
 
