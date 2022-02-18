@@ -183,8 +183,14 @@ class Startline:
         Return:
             key
         """
+        # bird_mask = np.clip(bird_mask + startline_mask, 0, 255)
 
-        bird_mask = np.clip(bird_mask + startline_mask, 0, 255)
+        startline_image[np.logical_or(bird_mask >= 175, bird_mask <= 25)] = 0
+
+        bird_mask[np.logical_and(
+                np.logical_and(bird_mask <= 175, startline_mask >= 225),
+                bird_mask >= 25)] = 250
+
         bird_image = np.clip(bird_image + startline_image, 0, 255)
 
         camera_image, camera_mask = self.get_camera_view(
@@ -221,7 +227,7 @@ if __name__ == "__main__":
 
     translation_step = 25
     scale_step = 25
-    rotation_step = 15
+    rotation_step = 10
 
     # Define render objects
     c = config.Config("config1.json", debug=False)
@@ -229,8 +235,8 @@ if __name__ == "__main__":
     r.update_position((1400, 0), math.pi)
     interpolation = cv2.INTER_LINEAR  # cv2.INTER_NEAREST
     angle = 0
-    offset_x = 1000
-    offset_y = 1000
+    offset_x = 300
+    offset_y = 1200
     scale = 1
     k = 0
     forward = False
@@ -266,17 +272,17 @@ if __name__ == "__main__":
                    offset_y:offset_y+patch_size*start_line_colums] = 250
 
         key = 0
-        while key != ord(" ") or ord("s"):
+        while key != ord(" ") or ord("q"):
             zeros_image, zeros_mask = startline.insert_startline(
                     zeros_image, zeros_mask, interpolation, key)
             key = startline.visualize_startline(
-                    bird_mask, bird_image, camera_image, camera_mask,
-                    zeros_image, zeros_mask, interpolation)
-            if key == ord("s"):
+                    np.copy(bird_mask), np.copy(bird_image), camera_image,
+                    camera_mask, np.copy(zeros_image), zeros_mask, interpolation)
+            if key == ord(" "):
                 cv2.imwrite("camera_mask.png", camera_mask)
                 cv2.imwrite("camera_image.png", camera_image)
                 break
-            if key == ord(" "):
+            if key == ord("q"):
                 break
             if key == 27:
                 exit()
