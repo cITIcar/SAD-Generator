@@ -52,7 +52,7 @@ class Startline:
         start_line_image = np.random.randint(0, 10, (
                 patch_size*start_line_rows, patch_size*start_line_colums))
         start_line_mask = np.ones((
-                patch_size*start_line_rows, patch_size*start_line_colums))*255
+                patch_size*start_line_rows, patch_size*start_line_colums))*250
 
         for i in range(start_line_rows):
             y_start = i * patch_size
@@ -183,9 +183,12 @@ class Startline:
         Return:
             key
         """
-        # bird_mask = np.clip(bird_mask + startline_mask, 0, 255)
 
+        # Delete the startline where there is no road below it
         startline_image[np.logical_or(bird_mask >= 175, bird_mask <= 25)] = 0
+
+        # Only annotate startline where there was road below it
+        startline_mask[np.logical_or(bird_mask >= 175, bird_mask <= 25)] = 0
 
         bird_mask[np.logical_and(
                 np.logical_and(bird_mask <= 175, startline_mask >= 225),
@@ -193,8 +196,16 @@ class Startline:
 
         bird_image = np.clip(bird_image + startline_image, 0, 255)
 
-        camera_image, camera_mask = self.get_camera_view(
-                r, bird_image, bird_mask, interpolation)
+        startline_camera_image, startline_camera_mask = self.get_camera_view(
+                r, startline_image, startline_mask, interpolation)
+
+        camera_mask_ = np.clip(startline_camera_mask + camera_mask, 0, 255)
+        camera_image_ = np.clip(startline_camera_image + camera_image, 0, 255)
+
+        bird_mask = cv2.resize(bird_mask, (1000, 1000),
+                               interpolation=interpolation)
+        bird_image = cv2.resize(bird_image, (1000, 1000),
+                                interpolation=interpolation)
 
         bird_mask = cv2.resize(bird_mask, (1000, 1000),
                                interpolation=interpolation)
@@ -203,9 +214,9 @@ class Startline:
         bird_mask = bird_mask[0:500, :]
         bird_image = bird_image[0:500, :]
 
-        camera_mask = cv2.resize(camera_mask, (1000, 500),
+        camera_mask = cv2.resize(camera_mask_, (1000, 500),
                                  interpolation=interpolation)
-        camera_image = cv2.resize(camera_image, (1000, 500),
+        camera_image = cv2.resize(camera_image_, (1000, 500),
                                   interpolation=interpolation)
 
         mask = np.concatenate([bird_mask, camera_mask], axis=0)
@@ -214,12 +225,18 @@ class Startline:
 
         cv2.imshow("result", result.astype(np.uint8))
         key = cv2.waitKey(0)
+        if key == ord(" "):
+            cv2.imwrite("./augmented_data/annotations/mask_" + str(index) +
+                        ".png", camera_mask_)
+            cv2.imwrite("./augmented_data/images/image_" + str(index) +
+                        ".png", camera_image_)
         return key
 
 
 if __name__ == "__main__":
 
-    # TODO Overlay annotation only over road and not over background
+    # TODO save image
+    # TODO create some UI
 
     with open('config1.json', 'r') as f:
         json_file = f.read()
@@ -233,7 +250,7 @@ if __name__ == "__main__":
     c = config.Config("config1.json", debug=False)
     r = render.Renderer(c)
     r.update_position((1400, 0), math.pi)
-    interpolation = cv2.INTER_LINEAR  # cv2.INTER_NEAREST
+    interpolation = cv2.INTER_NEAREST
     angle = 0
     offset_x = 300
     offset_y = 1200
@@ -241,6 +258,7 @@ if __name__ == "__main__":
     k = 0
     forward = False
     startline = Startline()
+    index = 0
 
     start_line_rows = config_json["start_line_rows"]
     start_line_colums = config_json["start_line_colums"]
@@ -277,12 +295,12 @@ if __name__ == "__main__":
                     zeros_image, zeros_mask, interpolation, key)
             key = startline.visualize_startline(
                     np.copy(bird_mask), np.copy(bird_image), camera_image,
-                    camera_mask, np.copy(zeros_image), zeros_mask, interpolation)
+                    np.copy(camera_mask), np.copy(zeros_image),
+                    np.copy(zeros_mask), interpolation)
             if key == ord(" "):
-                cv2.imwrite("camera_mask.png", camera_mask)
-                cv2.imwrite("camera_image.png", camera_image)
                 break
             if key == ord("q"):
                 break
             if key == 27:
                 exit()
+        index += 1
