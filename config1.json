@@ -8,9 +8,7 @@
     "chunk_size_px": 1000,
     "shuffle": true,
     "seed": 123456,
-    "start_line_rows": 3,
-    "start_line_colums":20,
-    "patch_size": 20,
+
 
     "obstacle_class": 0,
 
@@ -52,5 +50,23 @@
         { "RandomClipMax": [] },
         { "RandomClipMax": [] },
         { "DrunkDriving": [] }
-    ]
+    ],
+    
+    "startline_config":{
+        "start_line_rows": 3,
+        "start_line_colums":25,
+        "patch_size": 20,
+        "translation_step": 25,
+        "scale_step": 25,
+        "rotation_step": 10,
+        "img_write_path" : "./augmented_data/images/image_",
+        "mask_write_path" : "./augmented_data/annotations/mask_",
+        "angle" : 0,
+        "offset_x" : 300,
+        "offset_y" : 1200
+        
+        
+        
+    }
+
 }
