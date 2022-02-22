@@ -1,8 +1,14 @@
 """
-Augmentation of real world images with start lines.
-This GUI allows to transform real world camera images in bird's-eye-view
-and add a start line inside it. After the adding of the startline, the image
-will be transformed back into camera perspective.
+Augmentation of real world images with overlays.
+
+Via key presses the user can rotate and translate the overlay inside the
+real world background.
+Following keys exist:
+    "w"/"s": Translation along y-axis
+    "a"/"d": Translation along x-axis
+    "e"/"r": Rotation of overlay
+    Esc: Abort augmentation
+    Space: Save augmented sample
 """
 
 import numpy as np
@@ -18,7 +24,9 @@ from numpy.linalg import inv
 class ManualAugment:
     """
     This class is a template for the manual augmentation of real world images
-    with overlaying images.
+    with overlaying images. This GUI allows to transform real world camera
+    images in bird's-eye-view and add a overlay inside it. After the adding
+    of the overlay, the image will be transformed back into camera perspective.
 
     Attributes:
     translation_step : int
