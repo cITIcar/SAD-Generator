@@ -61,9 +61,17 @@
         "rotation_step": 10,
         "img_write_path" : "./augmented_data/images/image_",
         "mask_write_path" : "./augmented_data/annotations/mask_",
+        "img_object_path" : "img_overlay_path.png",
+        "mask_object_path" : "mask_overlay_path.png",
         "angle" : 0,
         "offset_x" : 300,
-        "offset_y" : 1200
+        "offset_y" : 1200,
+        "fov_camera" : 180,
+        "position_camera" : (1400, 0)
+        "camera_x_size" : 640,
+        "camera_y_size" : 480,
+        "overlay_mask_value" : 250,
+        "annotation_buffer" : 25
         
         
         
