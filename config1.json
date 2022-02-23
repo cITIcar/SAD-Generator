@@ -52,7 +52,7 @@
         { "DrunkDriving": [] }
     ],
     
-    "startline_config":{
+    "augmentation_config":{
         "start_line_rows": 3,
         "start_line_colums":25,
         "patch_size": 20,

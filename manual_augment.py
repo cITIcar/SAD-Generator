@@ -31,7 +31,6 @@ class ManualAugment:
     Attributes:
     translation_step : int
         How many pixels the startline moves every time the key is pressed
-    scale_step : int
     rotation_step : int
         How many degrees the startline rotates every time the key is pressed
     angle : int
@@ -54,11 +53,11 @@ class ManualAugment:
         """
         Define class attributes.
         """
-        with open('config1.json', 'r') as f:
-            json_file = f.read()
-        aug_config = json.loads(json_file)["startline_config"]
+        f = open('config1.json', 'r')
+        #    json_file = f.read()
+        aug_config = json.load(f)#["augmentation_config"]
+        print("ha")
         self.translation_step = aug_config["translation_step"]
-        self.scale_step = aug_config["scale_step"]
         self.rotation_step = aug_config["rotation_step"]
         self.angle = aug_config["angle"]
         self.offset_x = aug_config["offset_x"]
@@ -108,9 +107,9 @@ class ManualAugment:
             exit()
         return img, mask
 
-    def create_overlay(self):
+    def load_overlay(self):
         """
-        Create a annotated sample of an overlaying object.
+        Load a annotated sample of an overlaying object.
 
         The overlay has to be in bird's-eye-view.
 
@@ -118,17 +117,46 @@ class ManualAugment:
         None.
 
         Return:
-            start_line_image : int array
+            overlay_img : int array
                 Synthetic image that represents a real world object
-            start_line_mask : int array
+            overlay_mask : int array
                 Annotation of the object
         """
-        start_line_image = cv2.imread(self.img_overlay_path,
-                                      cv2.IMREAD_GRAYSCALE)
-        start_line_mask = cv2.imread(self.mask_overlay_path,
-                                     cv2.IMREAD_GRAYSCALE)
+        overlay_img = cv2.imread(self.img_overlay_path,
+                                 cv2.IMREAD_GRAYSCALE)
+        overlay_mask = cv2.imread(self.mask_overlay_path,
+                                  cv2.IMREAD_GRAYSCALE)
+        return overlay_img, overlay_mask
 
-        return start_line_image, start_line_mask
+    def create_overlay(self, overlay_img, x_size, y_size):
+        """
+        Insert the overlay into a black background.
+
+        The overlay has to be in bird's-eye-view.
+
+        Parameters:
+        overlay_img : numpy array
+            image of the overlay
+
+        Return:
+            img : int array
+                Overlay image inside a black background
+            mask : int array
+                Annotation of the object inside a black background
+        """
+
+        img = np.zeros((3000, 3000))
+        mask = np.zeros((3000, 3000))
+
+        x_size = overlay_img.shape[0]
+        y_size = overlay_img.shape[1]
+
+        img[self.offset_x:self.offset_x + x_size,
+            self.offset_y:self.offset_y + y_size] = overlay_img
+        mask[self.offset_x:self.offset_x + x_size,
+             self.offset_y:self.offset_y + y_size] = self.overlay_mask_value
+
+        return img, mask
 
     def transform_image(self, image, mask, key):
         """
