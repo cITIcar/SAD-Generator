@@ -54,9 +54,7 @@ class ManualAugment:
         Define class attributes.
         """
         f = open('config1.json', 'r')
-        #    json_file = f.read()
-        aug_config = json.load(f)#["augmentation_config"]
-        print("ha")
+        aug_config = json.load(f)["augmentation_config"]
         self.translation_step = aug_config["translation_step"]
         self.rotation_step = aug_config["rotation_step"]
         self.angle = aug_config["angle"]
@@ -64,8 +62,8 @@ class ManualAugment:
         self.offset_y = aug_config["offset_y"]
         self.mask_write_path = aug_config["mask_write_path"]
         self.img_write_path = aug_config["img_write_path"]
-        self.img_overlay_path = aug_config["img_overlay_path"]
-        self.mask_overlay_path = aug_config["mask_overlay_path"]
+        self.img_overlay_path = aug_config["img_object_path"]
+        self.mask_overlay_path = aug_config["mask_object_path"]
         self.camera_x_size = aug_config["camera_x_size"]
         self.camera_y_size = aug_config["camera_y_size"]
         self.overlay_mask_value = aug_config["overlay_mask_value"]
@@ -74,7 +72,8 @@ class ManualAugment:
         # Define render object for perspective transform
         render_config = config.Config("config1.json", debug=False)
         fov_camera = aug_config["fov_camera"]*math.pi/180
-        position_camera = aug_config["position_camera"]
+        position_camera = (aug_config["position_camera_x"],
+                           aug_config["position_camera_y"])
         self.renderer = render.Renderer(render_config)
         self.renderer.update_position(position_camera, fov_camera)
         self.interpolation = cv2.INTER_NEAREST
@@ -96,15 +95,12 @@ class ManualAugment:
         img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
         mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
 
-        if img or mask is None:
+        if img is None or mask is None:
             print("Image or Annotation not found.")
-            exit()
         if img.shape != mask.shape:
             print("Shape of Image and Annotation is not consistent.")
-            exit()
         if img.shape != (self.camera_x_size, self.camera_y_size):
             print("Image size is not consistent with configuration.")
-            exit()
         return img, mask
 
     def load_overlay(self):

@@ -6,7 +6,7 @@
     "rescale": 8,
     "chunk_size_cm": 250,
     "chunk_size_px": 1000,
-    "shuffle": true,
+    "shuffle": "true",
     "seed": 123456,
 
 
@@ -67,7 +67,8 @@
         "offset_x" : 300,
         "offset_y" : 1200,
         "fov_camera" : 180,
-        "position_camera" : (1400, 0)
+        "position_camera_x" : 1400,
+        "position_camera_y" : 0,
         "camera_x_size" : 640,
         "camera_y_size" : 480,
         "overlay_mask_value" : 250,

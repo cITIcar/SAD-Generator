@@ -33,9 +33,8 @@ class Startline(ManualAugment):
         Define class attributes.
         """
         super().__init__()
-        with open('config1.json', 'r') as f:
-            json_file = f.read()
-        startline_config = json.loads(json_file)["startline_config"]
+        f = open('config1.json', 'r')
+        startline_config = json.load(f)["augmentation_config"]
         self.start_line_rows = startline_config["start_line_rows"]
         self.start_line_colums = startline_config["start_line_colums"]
         self.patch_size = startline_config["patch_size"]
@@ -175,7 +174,7 @@ class Startline(ManualAugment):
         camera_mask = np.clip(overlay_camera_mask + camera_mask, 0, 255)
         camera_img = np.clip(overlay_camera_img + camera_img, 0, 255)
 
-        return bird_img, bird_mask, camera_img, camera_mask
+        return (bird_img, bird_mask, camera_img, camera_mask)
 
     def visualize_augmentation(self, bird_mask, bird_img, camera_img,
                                camera_mask, index):
@@ -243,15 +242,18 @@ if __name__ == "__main__":
                 img_path, mask_path)
         bird_img, bird_mask = startline.get_birds_eye_view(
                 camera_img, camera_mask)
-        startline_img, startline_mask = startline.create_overlay(startline_img)
+
+        (x_size, y_size) = startline_img.shape
+        startline_img, startline_mask = startline.create_overlay(
+                startline_img, x_size, y_size)
 
         key = 0
         while key != ord(" ") or ord("q"):
             startline_img = np.copy(startline_img)
             startline_mask = np.copy(startline_mask)
 
-            bird_img, bird_mask,
-            camera_img, camera_mask = startline.merge_bird_overlay(
+            (bird_img, bird_mask,
+             camera_img, camera_mask) = startline.merge_bird_overlay(
                     startline_img, startline_mask, bird_img,
                     bird_mask, camera_img, camera_mask)
             key = startline.visualize_augmentation(bird_mask, bird_img,
