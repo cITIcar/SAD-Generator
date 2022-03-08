@@ -28,7 +28,8 @@ class ManualAugment:
     images in bird's-eye-view and add a overlay inside it. After the adding
     of the overlay, the image will be transformed back into camera perspective.
 
-    Attributes:
+    Attributes
+    ----------
     translation_step : int
         How many pixels the startline moves every time the key is pressed
     rotation_step : int
@@ -80,13 +81,17 @@ class ManualAugment:
 
     def import_annotated_data(self, img_path, mask_path):
         """
-        Parameters:
+        Load array from image and mask of annotated sample.
+
+        Parameters
+        ----------
             img_path : String
                 Path to image of annotated sample
             mask_path : String
                 Path to mask of annotated smaple
 
-        Return:
+        Returns
+        -------
             img : numpy array
                 Image of annotated sample
             mask : numpy array
@@ -109,10 +114,12 @@ class ManualAugment:
 
         The overlay has to be in bird's-eye-view.
 
-        Parameters:
+        Parameters
+        ----------
         None.
 
-        Return:
+        Returns
+        -------
             overlay_img : int array
                 Synthetic image that represents a real world object
             overlay_mask : int array
@@ -130,11 +137,13 @@ class ManualAugment:
 
         The overlay has to be in bird's-eye-view.
 
-        Parameters:
+        Parameters
+        ----------
         overlay_img : numpy array
             image of the overlay
 
-        Return:
+        Returns
+        -------
             img : int array
                 Overlay image inside a black background
             mask : int array
@@ -161,7 +170,8 @@ class ManualAugment:
         Depending of the key pressed by the user the image and annotation is
         translated or rotated with the value defined in the config file.
 
-        Parameters:
+        Parameters
+        ----------
             image : numpy array
                 Image that contains overlay.
             mask : numpy array
@@ -169,7 +179,8 @@ class ManualAugment:
             key : int
                 Value of pressed key.
 
-        Return:
+        Returns
+        -------
             image : numpy array
                 Altered image that contains the overlay.
             mask : numpy array
@@ -205,12 +216,15 @@ class ManualAugment:
         """
         Transform the perspective of the camera images into bird's-eye-view.
 
-        Parameters:
+        Parameters
+        ----------
             camera_image : numpy array
                 Image in camera perspective
             camera_mask : numpy array
                 Annotation in camera perspective
-        Return:
+
+        Returns
+        -------
             bird_image : numpy array
                 Image in bird's-eye-view
             bird_mask : numpy array
@@ -229,12 +243,15 @@ class ManualAugment:
         """
         Transform the perspective of bird's-eye-view images into camera view.
 
-        Parameters:
+        Parameters
+        ----------
             bird_image : numpy array
                 Image in bird's-eye-view
             bird_mask : numpy array
                 Annotation in bird's-eye-view
-        Return:
+
+        Returns
+        -------
             camera_image : numpy array
                 Image in camera perspective
             camera_mask : numpy array
@@ -255,7 +272,8 @@ class ManualAugment:
         """
         Add together background and overlay for the image and annotation.
 
-        Parameters:
+        Parameters
+        ----------
             overlay_img : numpy array
                 Image of overlay in bird's-eye-view
             overlay_mask : numpy array
@@ -264,7 +282,9 @@ class ManualAugment:
                 Image of overlay in bird's-eye-view
             bird_mask : numpy array
                 Annotation of background in bird's-eye-view
-        Return:
+
+        Returns
+        -------
             bird_img : numpy array
                 Image of background with merged overlay in bird's-eye-view
             bird_mask : numpy array
@@ -291,7 +311,8 @@ class ManualAugment:
         """
         Visualize the mask and image of the bird's-eye-view and camera view.
 
-        Parameters:
+        Parameters
+        ----------
             bird_img : numpy array
                 Image of background with merged overlay in bird's-eye-view
             bird_mask : numpy array
@@ -303,7 +324,8 @@ class ManualAugment:
             index : int
                 unique identifier of one augmented annotated sample
 
-        Return:
+        Returns
+        -------
             key : int
                 Value of pressed key
         """

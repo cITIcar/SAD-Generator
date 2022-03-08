@@ -18,7 +18,8 @@ class Startline(ManualAugment):
     This class is made for the augmentation of real world images with start
     line images.
 
-    Attributes:
+    Attributes
+    ----------
     start_line_rows : int
         Number of rows that the startline has.
     start_line_colums : int
@@ -43,10 +44,12 @@ class Startline(ManualAugment):
         """
         Draw the basic shape of the startline.
 
-        Parameters:
+        Parameters
+        ----------
         None.
 
-        Return:
+        Returns
+        -------
             start_line_image : int array
                 Synthetic image that represents a real world start line
             start_line_mask : int array
@@ -80,12 +83,15 @@ class Startline(ManualAugment):
         """
         Transform the perspective of the camera images into bird's-eye-view.
 
-        Parameters:
+        Parameters
+        ----------
             camera_image : numpy array
                 Image in camera perspective
             camera_mask : numpy array
                 Annotation in camera perspective
-        Return:
+
+        Returns
+        -------
             bird_image : numpy array
                 Image in bird's-eye-view
             bird_mask : numpy array
@@ -111,12 +117,15 @@ class Startline(ManualAugment):
         """
         Transform the perspective of bird's-eye-view images into camera view.
 
-        Parameters:
+        Parameters
+        ----------
             bird_image : numpy array
                 Image in bird's-eye-view
             bird_mask : numpy array
                 Annotation in bird's-eye-view
-        Return:
+
+        Returns
+        -------
             camera_image : numpy array
                 Image in camera perspective
             camera_mask : numpy array
@@ -141,7 +150,8 @@ class Startline(ManualAugment):
         """
         Add together background and overlay for the image and annotation.
 
-        Parameters:
+        Parameters
+        ----------
             overlay_img : numpy array
                 Image of overlay in bird's-eye-view
             overlay_mask : numpy array
@@ -150,7 +160,9 @@ class Startline(ManualAugment):
                 Image of overlay in bird's-eye-view
             bird_mask : numpy array
                 Annotation of background in bird's-eye-view
-        Return:
+
+        Returns
+        -------
             bird_img : numpy array
                 Image of background with merged overlay in bird's-eye-view
             bird_mask : numpy array
@@ -181,7 +193,8 @@ class Startline(ManualAugment):
         """
         Visualize the mask and image of the bird's-eye-view and camera view.
 
-        Parameters:
+        Parameters
+        ----------
             bird_img : numpy array
                 Image of background with merged overlay in bird's-eye-view
             bird_mask : numpy array
@@ -193,7 +206,8 @@ class Startline(ManualAugment):
             index : int
                 unique identifier of one augmented annotated sample
 
-        Return:
+        Returns
+        -------
             key : int
                 Value of pressed key
         """
