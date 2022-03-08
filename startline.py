@@ -216,6 +216,7 @@ class Startline(ManualAugment):
 
         cv2.imshow("result", result.astype(np.uint8))
         key = cv2.waitKey(0)
+        print(key)
         if key == ord(" "):
             cv2.imwrite(self.mask_write_path + str(index) +
                         ".png", camera_mask)
@@ -233,6 +234,8 @@ if __name__ == "__main__":
 
     annotations_list = glob.glob("./real_dataset/annotations/set_*/*.jpg")
 
+    startline_img, startline_mask = startline.create_overlay(startline_img)
+
     if len(annotations_list) == 0:
         print("no annotated images found under the path")
 
@@ -243,24 +246,19 @@ if __name__ == "__main__":
         bird_img, bird_mask = startline.get_birds_eye_view(
                 camera_img, camera_mask)
 
-        (x_size, y_size) = startline_img.shape
-        startline_img, startline_mask = startline.create_overlay(
-                startline_img, x_size, y_size)
-
         key = 0
         while key != ord(" ") or ord("q"):
-            startline_img = np.copy(startline_img)
-            startline_mask = np.copy(startline_mask)
 
-            (bird_img, bird_mask,
-             camera_img, camera_mask) = startline.merge_bird_overlay(
-                    startline_img, startline_mask, bird_img,
-                    bird_mask, camera_img, camera_mask)
-            key = startline.visualize_augmentation(bird_mask, bird_img,
-                                                   camera_img, camera_mask,
+            (bird_img_n, bird_mask_n,
+             camera_img_n, camera_mask_n) = startline.merge_bird_overlay(
+                    np.copy(startline_img), np.copy(startline_mask),
+                    np.copy(bird_img), np.copy(bird_mask),
+                    np.copy(camera_img), np.copy(camera_mask))
+            key = startline.visualize_augmentation(bird_mask_n, bird_img_n,
+                                                   camera_img_n, camera_mask_n,
                                                    index)
             startline_img, startline_mask = startline.transform_image(
-                    startline_img, startline_mask, key)
+                    np.copy(startline_img), np.copy(startline_mask), key)
 
             if key == ord(" "):
                 break

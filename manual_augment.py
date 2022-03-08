@@ -124,7 +124,7 @@ class ManualAugment:
                                   cv2.IMREAD_GRAYSCALE)
         return overlay_img, overlay_mask
 
-    def create_overlay(self, overlay_img, x_size, y_size):
+    def create_overlay(self, overlay_img):
         """
         Insert the overlay into a black background.
 
