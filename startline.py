@@ -50,10 +50,10 @@ class Startline(ManualAugment):
 
         Returns
         -------
-            start_line_image : int array
-                Synthetic image that represents a real world start line
-            start_line_mask : int array
-                Annotation of the start line
+        start_line_image : int array
+            Synthetic image that represents a real world start line
+        start_line_mask : int array
+            Annotation of the start line
         """
 
         white_patch = np.random.randint(150, 255,
@@ -85,17 +85,17 @@ class Startline(ManualAugment):
 
         Parameters
         ----------
-            camera_image : numpy array
-                Image in camera perspective
-            camera_mask : numpy array
-                Annotation in camera perspective
+        camera_image : numpy array
+            Image in camera perspective
+        camera_mask : numpy array
+            Annotation in camera perspective
 
         Returns
         -------
-            bird_image : numpy array
-                Image in bird's-eye-view
-            bird_mask : numpy array
-                Annotation in bird's-eye-view
+        bird_image : numpy array
+            Image in bird's-eye-view
+        bird_mask : numpy array
+            Annotation in bird's-eye-view
         """
         zeros_1 = np.zeros((128, 128))
         zeros_2 = np.zeros((128, 128))
@@ -119,17 +119,17 @@ class Startline(ManualAugment):
 
         Parameters
         ----------
-            bird_image : numpy array
-                Image in bird's-eye-view
-            bird_mask : numpy array
-                Annotation in bird's-eye-view
+        bird_image : numpy array
+            Image in bird's-eye-view
+        bird_mask : numpy array
+            Annotation in bird's-eye-view
 
         Returns
         -------
-            camera_image : numpy array
-                Image in camera perspective
-            camera_mask : numpy array
-                Annotation in camera perspective
+        camera_image : numpy array
+            Image in camera perspective
+        camera_mask : numpy array
+            Annotation in camera perspective
         """
         camera_mask_large = cv2.warpPerspective(
                 bird_mask, self.renderer.h_segmentation, (640, 480),
@@ -152,25 +152,25 @@ class Startline(ManualAugment):
 
         Parameters
         ----------
-            overlay_img : numpy array
-                Image of overlay in bird's-eye-view
-            overlay_mask : numpy array
-                Annotation of overlay in bird's-eye-view
-            bird_img : numpy array
-                Image of overlay in bird's-eye-view
-            bird_mask : numpy array
-                Annotation of background in bird's-eye-view
+        overlay_img : numpy array
+            Image of overlay in bird's-eye-view
+        overlay_mask : numpy array
+            Annotation of overlay in bird's-eye-view
+        bird_img : numpy array
+            Image of overlay in bird's-eye-view
+        bird_mask : numpy array
+            Annotation of background in bird's-eye-view
 
         Returns
         -------
-            bird_img : numpy array
-                Image of background with merged overlay in bird's-eye-view
-            bird_mask : numpy array
-                Annotation of background with merged overlay in bird's-eye-view
-            camera_img : numpy array
-                Image of background with merged overlay in camera view
-            camera_mask : numpy array
-                Annotation of background with merged overlay in camera view
+        bird_img : numpy array
+            Image of background with merged overlay in bird's-eye-view
+        bird_mask : numpy array
+            Annotation of background with merged overlay in bird's-eye-view
+        camera_img : numpy array
+            Image of background with merged overlay in camera view
+        camera_mask : numpy array
+            Annotation of background with merged overlay in camera view
         """
         # Delete the startline where there is no road below it
         overlay_img[np.logical_or(bird_mask >= 175, bird_mask <= 25)] = 0
@@ -195,21 +195,21 @@ class Startline(ManualAugment):
 
         Parameters
         ----------
-            bird_img : numpy array
-                Image of background with merged overlay in bird's-eye-view
-            bird_mask : numpy array
-                Annotation of background with merged overlay in bird's-eye-view
-            camera_img : numpy array
-                Image of background with merged overlay in camera view
-            camera_mask : numpy array
-                Annotation of background with merged overlay in camera view
-            index : int
-                unique identifier of one augmented annotated sample
+        bird_img : numpy array
+            Image of background with merged overlay in bird's-eye-view
+        bird_mask : numpy array
+            Annotation of background with merged overlay in bird's-eye-view
+        camera_img : numpy array
+            Image of background with merged overlay in camera view
+        camera_mask : numpy array
+            Annotation of background with merged overlay in camera view
+        index : int
+            unique identifier of one augmented annotated sample
 
         Returns
         -------
-            key : int
-                Value of pressed key
+        key : int
+            Value of pressed key
         """
         bird_img_resized = cv2.resize(bird_img, (1000, 1000),
                                       interpolation=self.interpolation)

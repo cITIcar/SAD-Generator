@@ -85,17 +85,17 @@ class ManualAugment:
 
         Parameters
         ----------
-            img_path : String
-                Path to image of annotated sample
-            mask_path : String
-                Path to mask of annotated smaple
+        img_path : String
+            Path to image of annotated sample
+        mask_path : String
+            Path to mask of annotated smaple
 
         Returns
         -------
-            img : numpy array
-                Image of annotated sample
-            mask : numpy array
-                Mask of annotated sample
+        img : numpy array
+            Image of annotated sample
+        mask : numpy array
+            Mask of annotated sample
         """
         img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
         mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
@@ -120,10 +120,10 @@ class ManualAugment:
 
         Returns
         -------
-            overlay_img : int array
-                Synthetic image that represents a real world object
-            overlay_mask : int array
-                Annotation of the object
+        overlay_img : int array
+            Synthetic image that represents a real world object
+        overlay_mask : int array
+            Annotation of the object
         """
         overlay_img = cv2.imread(self.img_overlay_path,
                                  cv2.IMREAD_GRAYSCALE)
@@ -144,10 +144,10 @@ class ManualAugment:
 
         Returns
         -------
-            img : int array
-                Overlay image inside a black background
-            mask : int array
-                Annotation of the object inside a black background
+        img : int array
+            Overlay image inside a black background
+        mask : int array
+            Annotation of the object inside a black background
         """
 
         img = np.zeros((3000, 3000))
@@ -172,19 +172,19 @@ class ManualAugment:
 
         Parameters
         ----------
-            image : numpy array
-                Image that contains overlay.
-            mask : numpy array
-                Annotation of the image with the overlay.
-            key : int
-                Value of pressed key.
+        image : numpy array
+            Image that contains overlay.
+        mask : numpy array
+            Annotation of the image with the overlay.
+        key : int
+            Value of pressed key.
 
         Returns
         -------
-            image : numpy array
-                Altered image that contains the overlay.
-            mask : numpy array
-                Altered annotation that contains the overlay.
+        image : numpy array
+            Altered image that contains the overlay.
+        mask : numpy array
+            Altered annotation that contains the overlay.
         """
         if(key == ord("a")):
             image = imutils.translate(image, self.translation_step, 0)
@@ -218,17 +218,17 @@ class ManualAugment:
 
         Parameters
         ----------
-            camera_image : numpy array
-                Image in camera perspective
-            camera_mask : numpy array
-                Annotation in camera perspective
+        camera_image : numpy array
+            Image in camera perspective
+        camera_mask : numpy array
+            Annotation in camera perspective
 
         Returns
         -------
-            bird_image : numpy array
-                Image in bird's-eye-view
-            bird_mask : numpy array
-                Annotation in bird's-eye-view
+        bird_image : numpy array
+            Image in bird's-eye-view
+        bird_mask : numpy array
+            Annotation in bird's-eye-view
         """
         bird_mask = cv2.warpPerspective(
                 camera_mask, inv(self.renderer.h_segmentation),
@@ -245,17 +245,17 @@ class ManualAugment:
 
         Parameters
         ----------
-            bird_image : numpy array
-                Image in bird's-eye-view
-            bird_mask : numpy array
-                Annotation in bird's-eye-view
+        bird_image : numpy array
+            Image in bird's-eye-view
+        bird_mask : numpy array
+            Annotation in bird's-eye-view
 
         Returns
         -------
-            camera_image : numpy array
-                Image in camera perspective
-            camera_mask : numpy array
-                Annotation in camera perspective
+        camera_image : numpy array
+            Image in camera perspective
+        camera_mask : numpy array
+            Annotation in camera perspective
         """
         camera_mask = cv2.warpPerspective(
                 bird_mask, self.renderer.h_segmentation,
@@ -274,25 +274,25 @@ class ManualAugment:
 
         Parameters
         ----------
-            overlay_img : numpy array
-                Image of overlay in bird's-eye-view
-            overlay_mask : numpy array
-                Annotation of overlay in bird's-eye-view
-            bird_img : numpy array
-                Image of overlay in bird's-eye-view
-            bird_mask : numpy array
-                Annotation of background in bird's-eye-view
+        overlay_img : numpy array
+            Image of overlay in bird's-eye-view
+        overlay_mask : numpy array
+            Annotation of overlay in bird's-eye-view
+        bird_img : numpy array
+            Image of overlay in bird's-eye-view
+        bird_mask : numpy array
+            Annotation of background in bird's-eye-view
 
         Returns
         -------
-            bird_img : numpy array
-                Image of background with merged overlay in bird's-eye-view
-            bird_mask : numpy array
-                Annotation of background with merged overlay in bird's-eye-view
-            camera_img : numpy array
-                Image of background with merged overlay in camera view
-            camera_mask : numpy array
-                Annotation of background with merged overlay in camera view
+        bird_img : numpy array
+            Image of background with merged overlay in bird's-eye-view
+        bird_mask : numpy array
+            Annotation of background with merged overlay in bird's-eye-view
+        camera_img : numpy array
+            Image of background with merged overlay in camera view
+        camera_mask : numpy array
+            Annotation of background with merged overlay in camera view
         """
         bird_mask[np.logical_and(
                 overlay_mask >= self.overlay_mask_value -
@@ -313,21 +313,21 @@ class ManualAugment:
 
         Parameters
         ----------
-            bird_img : numpy array
-                Image of background with merged overlay in bird's-eye-view
-            bird_mask : numpy array
-                Annotation of background with merged overlay in bird's-eye-view
-            camera_img : numpy array
-                Image of background with merged overlay in camera view
-            camera_mask : numpy array
-                Annotation of background with merged overlay in camera view
-            index : int
-                unique identifier of one augmented annotated sample
+        bird_img : numpy array
+            Image of background with merged overlay in bird's-eye-view
+        bird_mask : numpy array
+            Annotation of background with merged overlay in bird's-eye-view
+        camera_img : numpy array
+            Image of background with merged overlay in camera view
+        camera_mask : numpy array
+            Annotation of background with merged overlay in camera view
+        index : int
+            unique identifier of one augmented annotated sample
 
         Returns
         -------
-            key : int
-                Value of pressed key
+        key : int
+            Value of pressed key
         """
         bird_img_resized = cv2.resize(bird_img, (1000, 1000),
                                       interpolation=self.interpolation)

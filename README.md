@@ -111,3 +111,21 @@ The parameters passed to this method are:
 The `update_position_step` is called whenever the position of the vehicle is updated. It receives the current position and angle of the car and is expected to return both as a tuple, making it possible to modify the drive path defined in the chunk JSON files.
 
 Finally, the class field `ordering` is used to determine the rendering order. It is used both for the order of the `pre_transform_step` and the `post_transform_step`, but can be modified in between. For rendering objects this value should be set in the `pre_transform_step` to the distance of the object to the camera.
+
+### Manual Augmentation
+
+This repository offers an interactive GUI for manual augmentation.
+
+The class 'ManualAugment' in the file 'manual_augment.py' contains generic functions for manualy adding overlays to annotated samples.
+The program 'startline.py' shows an example of the manual augmentation. Here a startline will be added to the image and annotation of the data sample.
+A interactive GUI is offered to the user where he can translate and rotate the overlay inside the image.
+When the overlay has reached the final pose, the user can save the image. The overlay will be automatically added to the image and annotation.
+
+Use
+```bash
+python startline.py
+```
+test the example.
+
+Keep in mind that the input and output paths for the images have to match.
+The paths are set in the configuration file 'config1.json'.
