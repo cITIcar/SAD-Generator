@@ -259,7 +259,7 @@ if __name__ == "__main__":
 
             (bird_img_n, bird_mask_n,
              camera_img_n, camera_mask_n) = startline.merge_bird_overlay(
-                    startline_img, startline_mask,
+                    np.copy(startline_img), np.copy(startline_mask),
                     np.copy(bird_img), np.copy(bird_mask),
                     np.copy(camera_img), np.copy(camera_mask))
             key = startline.visualize_augmentation(bird_mask_n, bird_img_n,
