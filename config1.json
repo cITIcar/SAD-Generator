@@ -69,8 +69,8 @@
         "fov_camera" : 180,
         "position_camera_x" : 1400,
         "position_camera_y" : 0,
-        "camera_x_size" : 128,
-        "camera_y_size" : 64,
+        "camera_x_size" : 64,
+        "camera_y_size" : 128,
         "overlay_mask_value" : 250,
         "annotation_buffer" : 25
         
