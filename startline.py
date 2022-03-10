@@ -34,7 +34,6 @@ class Startline(ManualAugment):
         Define class attributes.
         """
         super().__init__()
-#        f = open('config1.json', 'r')
         with open('config1.json', 'r') as f:
             config = json.load(f)
 
@@ -218,7 +217,6 @@ class Startline(ManualAugment):
         image = np.concatenate([bird_img_resized, camera_img_resized], axis=0)
         result = np.concatenate([mask, image], axis=1)
 
-
         result = cv2.resize(result, (667, 500))
         cv2.imshow("result", result.astype(np.uint8))
         key = cv2.waitKey(0)
@@ -239,7 +237,7 @@ if __name__ == "__main__":
 
     annotations_list = glob.glob("./real_dataset/annotations/set_*/*.png")
 
-    startline_img, startline_mask = startline.create_overlay(startline_img)
+    startline_img_, startline_mask_ = startline.create_overlay(startline_img)
 
     if len(annotations_list) == 0:
         print("no annotated images found under the path")
@@ -251,19 +249,22 @@ if __name__ == "__main__":
         bird_img, bird_mask = startline.get_birds_eye_view(
                 camera_img, camera_mask)
 
+        startline_img, startline_mask = (np.copy(startline_img_),
+                                         np.copy(startline_mask_))
         key = 0
         while key != ord(" ") or ord("q"):
 
+            startline_img, startline_mask = startline.transform_image(
+                    startline_img, startline_mask, key)
+
             (bird_img_n, bird_mask_n,
              camera_img_n, camera_mask_n) = startline.merge_bird_overlay(
-                    np.copy(startline_img), np.copy(startline_mask),
+                    startline_img, startline_mask,
                     np.copy(bird_img), np.copy(bird_mask),
                     np.copy(camera_img), np.copy(camera_mask))
             key = startline.visualize_augmentation(bird_mask_n, bird_img_n,
                                                    camera_img_n, camera_mask_n,
                                                    index)
-            startline_img, startline_mask = startline.transform_image(
-                    np.copy(startline_img), np.copy(startline_mask), key)
 
             if key == ord(" "):
                 break
@@ -272,3 +273,4 @@ if __name__ == "__main__":
             if key == 27:
                 exit()
         index += 1
+
