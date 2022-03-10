@@ -14,12 +14,6 @@ from disturbances import *
 import augment
 
 
-# TODO ALle Kommentare auf Englisch
-# TODO Folie über anpassung chunks auf individuelles Problem
-# TODO Hardgecodete Variablen aus Code entfernen
-# TODO Code besser nutzbar machen
-
-
 parser = argparse.ArgumentParser(description="generate training data")
 parser.add_argument(
     "--config", metavar="config file", type=str, required=True,
@@ -30,7 +24,6 @@ parser.add_argument(
 
 
 def generate_synthetic(config, splitname, output_idcs):
-    print(output_idcs) # debug
     road_generator = road.Road(config)
     renderer = render.Renderer(config)
 
@@ -73,7 +66,7 @@ def generate_synthetic(config, splitname, output_idcs):
         print(f"\033[1A\033[K{p_idx / (time.time() - t1):.5} fps, {idx + 1}/{len(output_idcs)}")
 
 
-def generate_augmented(config, splitname, data_amount):
+def generate_augmented(config, splitname, output_idcs):
     annotations_input_path = config["paths"]["manual_annotations_input_path"]
     images_input_path = config["paths"]["manual_images_input_path"]
 
@@ -83,7 +76,7 @@ def generate_augmented(config, splitname, data_amount):
 
     augment.augment_dataset(
         annotations_input_path, images_input_path,
-        annotations_base_path, images_base_path, data_amount, config)
+        annotations_base_path, images_base_path, output_idcs, config)
 
 
 def init_paths(config):
@@ -113,15 +106,24 @@ if __name__ == "__main__":
     for name, split in config["splits"].items():
         os.makedirs(output_path_annotations.format(splitname=name), exist_ok=True)
         os.makedirs(output_path_images.format(splitname=name), exist_ok=True)
-        print("generating split: ", name)
-
+        print("generating split", name)
+        print("synthetic")
+        print()
         idcs = list(range(split["size"]))
-
-        if config["shuffle"]: 
+        if config["shuffle"]:
             random.shuffle(idcs)
-        generate_synthetic(config, name, idcs[round((1 - split["fraction_synthetic"])*split["size"]):])
+        generate_synthetic(
+            config,
+            name,
+            idcs[round(
+                (1 - split["fraction_synthetic"]) *
+                split["size"]):])
 
         print("augmented")
-        
-        generate_augmented(config, name, split["size"])
+        generate_augmented(
+            config,
+            name,
+            idcs[:round(
+                split["fraction_augmented"] *
+                split["size"])])
 

@@ -123,15 +123,15 @@ def add_obstacle(image, mask, config):
     return image, mask
 
 
-def augment_dataset(annotations_path, images_path, annotations_output_path, images_output_path, data_amount, config):
+def augment_dataset(annotations_path, images_path, annotations_output_path, images_output_path, idcs, config):
     """
     This function gets the path of the real world data, 
     the location where they have to be saved and the amount of demanded augmented images.
     It adds obstacles, overlays and noise to the rela world images.
     """
     
-    annotations_list = glob.glob(annotations_path + "/*.jpg")
-    images_list = glob.glob(images_path + "/*.jpg")
+    annotations_list = glob.glob(annotations_path + "/*.png")
+    images_list = glob.glob(images_path + "/*.png")
 
     if len(annotations_list) == 0:
         print("no annotated png images found under the path", annotations_path)
@@ -142,7 +142,7 @@ def augment_dataset(annotations_path, images_path, annotations_output_path, imag
 
     index = 0
     
-    while (index <= data_amount):
+    while index < len(idcs):
     
         for mask_path in annotations_list:
             image_path = mask_path.replace("annotations", "images")
@@ -162,12 +162,12 @@ def augment_dataset(annotations_path, images_path, annotations_output_path, imag
 
             image = add_noise(image, random.randint(0, 30))
 
-            cv2.imwrite(f"{annotations_output_path}/image_{index}.png", mask)
-            cv2.imwrite(f"{images_output_path}/image_{index}.png", image)
+            cv2.imwrite(f"{annotations_output_path}/image_{idcs[index]}.png", mask)
+            cv2.imwrite(f"{images_output_path}/image_{idcs[index]}.png", image)
 
-            index +=1
-            
-            if index >= data_amount:  # End loop after amount of image have been augmented
+            index += 1
+
+            if index >= len(idcs):  # End loop after amount of image have been augmented
                 break
 
 

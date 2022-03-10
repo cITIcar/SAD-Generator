@@ -19,7 +19,7 @@ class Config:
 
         self.config["px_per_cm"] = self.config["chunk_size_px"] / self.config["chunk_size_cm"]
         self.config["camera_height_px"] = self.config["camera_height"] * self.config["px_per_cm"]
-        self.config["debug"] = True # debug
+        self.config["debug"] = debug
 
 
     def __getitem__(self, key):
