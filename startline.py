@@ -34,11 +34,15 @@ class Startline(ManualAugment):
         Define class attributes.
         """
         super().__init__()
-        f = open('config1.json', 'r')
-        startline_config = json.load(f)["augmentation_config"]
+#        f = open('config1.json', 'r')
+        with open('config1.json', 'r') as f:
+            config = json.load(f)
+
+        startline_config = config["augmentation_config"]
         self.start_line_rows = startline_config["start_line_rows"]
         self.start_line_colums = startline_config["start_line_colums"]
         self.patch_size = startline_config["patch_size"]
+        self.output_size = config["output_size"]
 
     def draw_startline(self):
         """
@@ -97,19 +101,11 @@ class Startline(ManualAugment):
         bird_mask : numpy array
             Annotation in bird's-eye-view
         """
-        zeros_1 = np.zeros((128, 128))
-        zeros_2 = np.zeros((128, 128))
-        zeros_1[64:128, :] = camera_mask
-        zeros_2[64:128, :] = camera_image
-        zeros_1_large = cv2.resize(zeros_1, (640, 480),
-                                   interpolation=self.interpolation)
-        zeros_2_large = cv2.resize(zeros_2, (640, 480),
-                                   interpolation=self.interpolation)
         bird_mask = cv2.warpPerspective(
-                zeros_1_large, inv(self.renderer.h_segmentation),
+                camera_mask, inv(self.renderer.h_segmentation),
                 (3000, 3000), flags=self.interpolation)
         bird_image = cv2.warpPerspective(
-                zeros_2_large, inv(self.renderer.h_segmentation),
+                camera_image, inv(self.renderer.h_segmentation),
                 (3000, 3000), flags=self.interpolation)
         return bird_image, bird_mask
 
@@ -131,18 +127,12 @@ class Startline(ManualAugment):
         camera_mask : numpy array
             Annotation in camera perspective
         """
-        camera_mask_large = cv2.warpPerspective(
-                bird_mask, self.renderer.h_segmentation, (640, 480),
+        camera_mask = cv2.warpPerspective(
+                bird_mask, self.renderer.h_segmentation, self.output_size,
                 flags=self.interpolation)
-        camera_image_large = cv2.warpPerspective(
-                bird_image, self.renderer.h_segmentation, (640, 480),
+        camera_image = cv2.warpPerspective(
+                bird_image, self.renderer.h_segmentation, self.output_size,
                 flags=self.interpolation)
-        camera_mask = cv2.resize(camera_mask_large, (128, 128),
-                                 interpolation=self.interpolation)
-        camera_image = cv2.resize(camera_image_large, (128, 128),
-                                  interpolation=self.interpolation)
-        camera_mask = camera_mask[64:128, :]
-        camera_image = camera_image[64:128, :]
         return camera_image, camera_mask
 
     def merge_bird_overlay(self, overlay_img, overlay_mask, bird_img,
@@ -228,9 +218,10 @@ class Startline(ManualAugment):
         image = np.concatenate([bird_img_resized, camera_img_resized], axis=0)
         result = np.concatenate([mask, image], axis=1)
 
+
+        result = cv2.resize(result, (667, 500))
         cv2.imshow("result", result.astype(np.uint8))
         key = cv2.waitKey(0)
-        print(key)
         if key == ord(" "):
             cv2.imwrite(self.mask_write_path + str(index) +
                         ".png", camera_mask)
@@ -246,7 +237,7 @@ if __name__ == "__main__":
 
     startline_img, startline_mask = startline.draw_startline()
 
-    annotations_list = glob.glob("./real_dataset/annotations/set_*/*.jpg")
+    annotations_list = glob.glob("./real_dataset/annotations/set_*/*.png")
 
     startline_img, startline_mask = startline.create_overlay(startline_img)
 
