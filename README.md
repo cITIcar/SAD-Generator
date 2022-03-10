@@ -13,7 +13,7 @@ This data generator gives a simple and fast approach to create artificial datase
 
 If our code helped you, please consider citing our paper:  
 - [1] Pau Dietz Romero, Merlin David Mengel, Jakob Czekansky  
-  [Synthesising large, low cost and diverse datasets for robust semantic segmentation in self-driving tasks]()
+  [Synthesizing large, low cost and diverse datasets for robust semantic segmentation in self-driving tasks]()
 
 
 ## Creating a virtual environment
@@ -60,16 +60,16 @@ The full reference is available in [CONFIG.md](CONFIG.md).
 
 ### chunks
 
-The data generator picks the basic building blocks (chunks) from the folder `chunks` to dynamically create and annotate a ground plane. There are four different chunk types: `curve_left`, `curve_right`, `line` and `intersection`. For every chunk type there has to exist exactly one label and at least one image. If multiple images exist for one type they would be called variants of the chunk. The label contains the semantic information of the chunk. The image is the visual appearance of the road element. Every chunk type has a correspondant JSON file with its metadata. One important metainformation is the ideal path that the car would take through the chunk.
+The data generator picks the basic building blocks (chunks) from the folder `chunks` to dynamically create and annotate a ground plane. There are four different chunk types: `curve_left`, `curve_right`, `line` and `intersection`. For every chunk type there has to exist exactly one label and at least one image. If multiple images exist for one type they would be called variants of the chunk. The label contains the semantic information of the chunk. The image is the visual appearance of the road element. Every chunk type has a correspondent JSON file with its metadata. One important meta information is the ideal path that the car would take through the chunk.
 
-This figure shows how the ground plane is modularly constructed from chunks.
+This figure shows how the ground plane is modularily constructed from chunks.
 <img width="50%" src="https://user-images.githubusercontent.com/88937076/138558644-222a3bcd-ea1d-46ec-918f-5033dd79b3ef.png"></img>
 
 In our example the chunks represent the building blocks of a miniature track for a model car. By changing the chunk images, one can adapt the data generator to their own self-driving task. The chunk images need a consistent scale and size which has to be defined in the [config](CONFIG.md). Additionally the images have to be in the bird's-eye-view.
 
 ### overlays
 
-Overlays are random distracting images which the data generator puts on the camera image to enhance the variety of the dataset. They serve as disturbing artefacts and do not affect the annotations of the images because they do not belong to a segmentation class. The user can add their own overlays inside the folder `overlays`.
+Overlays are random distracting images which the data generator puts on the camera image to enhance the variety of the dataset. They serve as disturbing artifacts and do not affect the annotations of the images because they do not belong to a segmentation class. The user can add their own overlays inside the folder `overlays`.
 
 ### white_box
 
@@ -77,13 +77,13 @@ The images in this folder are added to the camera images and the annotations usi
 
 ### disturbances
 The generator is capable of creating various disturbing factors.
-These may be objects that are added to the scene, or changes in the driving behaviour.
+These may be objects that are added to the scene, or changes in the driving behavior.
 
 The folder `disturbances` contains a set of predefined disturbing factors:
 
 - _BoxObstacle_ Places a box of random size and position into the scene.
 Since there is a class associated with an obstacle, it is rendered both in the camera image and the segmentation image.
-- _RandomClipMax_ Reguarily Chooses a random frequency at which it clips the brightness of the output image.
+- _RandomClipMax_ Regularly Chooses a random frequency at which it clips the brightness of the output image.
 - _RandomBrightness_ Randomly brightens the output image.
 - _HiddenGroundRect_ Hides a section of the ground. The segmentation image is no affected.
 - _Dust_ Sets a number of randomly selected pixels on the ground plane to a defined color to simulate dust.
@@ -114,10 +114,12 @@ Finally, the class field `ordering` is used to determine the rendering order. It
 
 ### Manual Augmentation
 
+https://user-images.githubusercontent.com/88937076/157739977-2eee7219-2c1b-4ba0-9416-3d1052bb2a5c.mp4
+
 This repository offers an interactive GUI for manual augmentation.
 
-The class 'ManualAugment' in the file 'manual_augment.py' contains generic functions for manualy adding overlays to annotated samples.
-The program 'startline.py' shows an example of the manual augmentation. Here a startline will be added to the image and annotation of the data sample.
+The class 'ManualAugment' in the file 'manual_augment.py' contains generic functions for manually adding overlays to annotated samples.
+The program 'startline.py' shows an example of the manual augmentation. Here a start line will be added to the image and annotation of the data sample.
 A interactive GUI is offered to the user where he can translate and rotate the overlay inside the image.
 When the overlay has reached the final pose, the user can save the image. The overlay will be automatically added to the image and annotation.
 
@@ -125,7 +127,21 @@ Use
 ```bash
 python startline.py
 ```
-test the example.
+to test the example.
+
+The start line can be moved using the following controls:
+
+| Key | Action |
+|-----|--------|
+| W   | move start line away from the camera  | 
+| A   | move start line to the left | 
+| S   | move start line towards the camera| 
+| D   | move start line to the right | 
+| E   | rotate the start line clockwise | 
+| R   | rotate the start line counter-clockwise | 
+| Q   | skip the image | 
+| Space   | save the image and go to the next | 
+| ESC   | quit | 
 
 Keep in mind that the input and output paths for the images have to match.
 The paths are set in the configuration file 'config1.json'.
