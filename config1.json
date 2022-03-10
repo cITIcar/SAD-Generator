@@ -12,10 +12,10 @@
     "obstacle_class": 200,
 
     "paths": {
-        "annotations_output_path": "data/annotations/{splitname}/some_set",
-        "images_output_path": "data/images/{splitname}/some_set",
-        "manual_annotations_input_path": "real_dataset/annotations",
-        "manual_images_input_path": "real_dataset/images",
+        "annotations_output_path": "data/annotations/{splitname}",
+        "images_output_path": "data/images/{splitname}",
+        "manual_annotations_input_path": "real_dataset/annotations/set_*",
+        "manual_images_input_path": "real_dataset/images/set_*",
         "chunk_path": "chunks",
         "chunk_file_pattern": "{chunk_type}_{variant}",
         "output_file_pattern": "image_{idx}.png"
@@ -23,17 +23,21 @@
 
     "splits": {
         "train_split": {
-            "size": 10000,
+            "size": 50,
             "fraction_synthetic": 0.5,
             "fraction_augmented": 0.5
         },
         "validation_split": {
-            "size": 300,
+            "size": 50,
+            "fraction_synthetic": 0.5,
+            "fraction_augmented": 0.5
+        },
+        "test_split": {
+            "size": 50,
             "fraction_synthetic": 0.5,
             "fraction_augmented": 0.5
         }
     },
-
     "disturbances": [
         { "HiddenGroundRect": [] },
         { "BoxObstacle": [] },
@@ -45,5 +49,32 @@
         { "RandomClipMax": [] },
         { "RandomClipMax": [] },
         { "DrunkDriving": [] }
-    ]
+    ],
+    
+    "augmentation_config":{
+        "start_line_rows": 3,
+        "start_line_colums":25,
+        "patch_size": 20,
+        "translation_step": 25,
+        "scale_step": 25,
+        "rotation_step": 10,
+        "img_write_path" : "./augmented_data/images/image_",
+        "mask_write_path" : "./augmented_data/annotations/mask_",
+        "img_object_path" : "img_overlay_path.png",
+        "mask_object_path" : "mask_overlay_path.png",
+        "angle" : 0,
+        "offset_x" : 400,
+        "offset_y" : 1000,
+        "fov_camera" : 180,
+        "position_camera_x" : 1400,
+        "position_camera_y" : 0,
+        "camera_x_size" : 64,
+        "camera_y_size" : 128,
+        "overlay_mask_value" : 250,
+        "annotation_buffer" : 25
+        
+        
+        
+    }
+
 }
