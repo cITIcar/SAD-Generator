@@ -1,34 +1,56 @@
 import cv2 as cv
 import numpy as np
 import json 
-import random
-import time
 import glob
 
 class Road:
     """
-    Die Klasse enthält alle Funktionen, die ein Gesamtbild der Straße erzeugen.
-
+    Objects of this class represent a large street map.
+    
+    Attributes
+    ----------
+    images : Dict
+        Data structure to store all images and annotations of chunks.
+    degree_list : List
+        List with angle information for each previous chunk.
+    size_image_px : int
+        Size of chunk in number of pixels.
+    
+        
+        
     """
 
     def __init__(self, config):
+        self.images = {}
+        self.chunk_json = {}
         self.file_list = ["line", "line", "intersection", "line"]
         self.degree_list = [ 0, 0, 0, 0 ]
         self.size_image_px = 1000
         self.config = config
         self.load_images()
 
-
     def load_images(self):
         """
-        Lädt alle Segment Typen ein und speichert sie in allen möglichen Rotationen
-        """
-        self.images = {}
-        self.chunk_json = {}
+        Load all chunks into RAM.
+        
+        This function saves computing time during the simulation. Instead of
+        loading the images from the persistent memory each time and performing
+        the necessary rotations, all possible rotations are stored in a quickly
+        accessible list.
 
-        for segment_type in [ "line", "intersection", "curve_left", "curve_right" ]:
+        Parameters
+        ----------
+        None.
+
+        Returns
+        -------
+        None.
+        """
+        for segment_type in [ "line", "intersection", "curve_left",
+                             "curve_right" ]:
             self.images[segment_type] = { "segment": [], "nice": [] }
-            for variant in sorted(glob.glob(f"chunks/{segment_type}_segment*.png")):
+            for variant in sorted(glob.glob(
+                    f"chunks/{segment_type}_segment*.png")):
                 segment = cv.imread(variant, cv.IMREAD_GRAYSCALE)
 
                 self.images[segment_type]["segment"].append({
@@ -58,85 +80,102 @@ class Road:
                     -90: cv.rotate(nice, cv.ROTATE_90_CLOCKWISE).astype(np.float32),
                 })
 
-
     def get_position(self):
         """
-        Schritt 1
-        Die Funktion bestimmt die Position des nächsten chunks in Abhängigkeit der bisherigen chunk-Winkel im mn-Koordinatensystem.
-        Input: degree_list(Liste mit Winkelinformationen zu jedem bisherigen chunk) ist ein Klassenattribut.
-        Output: position_list(Liste mit Positionen aller chunks im mn-Koordinatensystem), 
-        total_degree_list(Liste mit resultierender Winkelinformation aller chunks)
+        The function determines the position of the next chunk.
+
+        THe position of the next chunk depends on the angle of the previous
+        chunk in the mn coordinate system.
+
+        Parameters
+        ----------
+        None.
+
+        Returns
+        -------
+        position_list : list
+            List with positions of all chunks in the mn coordinate system
+        total_degree_list : list
+            List with resulting angle information of all chunks
         """ 
-        # Setze den ersten chunk in den Ursprung des mn-Koordinatensystems
+        # Set the first chunk to the origin of the mn coordinate system
         position_list = [(0,0)]
 
-        # Das erste Element beginnt immer orthogonal zum Bild gesehen 
+        # The first chunk starts always with angle zero.
         total_degree_list = [0] 
 
-        # Setze den zweiten bis letzten chunk
+        # Set the second to last chunk.
         for i in range(1, len(self.degree_list)):
 
-            # Summiere alle bisherigen Winkel um gesamte Drehung zu ermitteln
+            # Sum all previous angles to determine total rotation
             total_degree = sum(self.degree_list[1:i+1])
-            # print(total_degree)
-
-            # Schreibe die Gesamtdrehung in des entsprechende list
             total_degree_list.append(total_degree)
 
-            # Hole die Position des vorherigen chunks
+            # Get the position of the previous chunk
             (m, n) = position_list[i-1]
 
-            # vorheriger chunk zeigt nach rechts -> nächster chunk rechts
+            # previous chunk points right -> next chunk right
             if total_degree_list[i] == 90:
                 m = m + 1
-            # vorheriger chunk zeigt nach links -> nächster chunk links
+            # previous chunk points to the left -> next chunk to the left
             elif total_degree_list[i] == -90:
                 m = m - 1
-            # vorheriger chunk zeigt nach oben -> nächster chunk oben
+            # previous chunk points up -> next chunk up
             elif total_degree_list[i] == 0:
                 n = n + 1
-            # vorheriger chunk zeigt nach unten -> nächster chunk unten
+            # previous chunk points down -> next chunk down
             elif total_degree_list[i] == -180 or total_degree_list[i] == 180:
                 n = n - 1
 
-            # Schreibe die Position des aktuellen chunks
             position_list.append((m, n))
         
         return position_list, total_degree_list
 
-
     def transform_mn2hv(self, position_list):
         """
-        Schritt 2
-        Diese Funktion berechnet die Transformationsparameter vom mn- in das hv-Koordinatensystem
-        Input: position_list(Liste mit Positionen aller chunks im mn-Koordinatensystem inklusive des neuen chunks), 
-        size_image_px(Größe eines chunks in Pixel) ist ein Klassenattribut.
-        Output: size_image_vertikal(vertikale Größe des Gesamtbildes), size_image_horizontal(horizontale Größe des Gesamtbildes), 
-        center_shift_vertikal(vertikaler Abstand zwischen mn- und hv-Koordinatensystem), 
-        center_shift_horizontal(horizontaler Abstand zwischen mn- und hv-Koordinatensystem)
+        Calculate the parameters from the mn to the hv coordinate system.
+
+        Parameters
+        ----------
+        position_list : list
+            List with positions of all chunks in the mn coordinate system
+            including the new chunk.
+
+        Returns
+        -------
+        size_image_vertikal : int
+            vertical size of the whole image
+        size_image_horizontal : int
+            horizontal size of the whole image
+        center_shift_vertikal : int
+            vertical shift between mn and hv coordinate system
+        center_shift_horizontal : int
+            horizontal shift between mn and hv coordinate system
         """
-        # Bestimme die Anzahl horizontal angeordneter chunks
+        # Get the number of horizontally arranged chunks
         m_min = min(x[0] for x in position_list)
         m_max = max(x[0] for x in position_list)
-        m_delta = m_max - m_min + 1 + 4              # 1 wegen der Null und 4 wegen dem Rand
+        # 1 because of the zero and 4 because of the margin
+        m_delta = m_max - m_min + 1 + 4
         size_image_horizontal = int(m_delta * self.size_image_px)
 
-        # Bestimme die Anzahl vertikal angeordneter chunks
+        # Get the number of vertically arranged chunks
         n_min = min(x[1] for x in position_list)
         n_max = max(x[1] for x in position_list)
-        n_delta = n_max - n_min + 1 + 4		# 1 wegen der Null und 4 wegen dem Rand
+        n_delta = n_max - n_min + 1 + 4
         size_image_vertikal = int(n_delta * self.size_image_px)
 
-        # Bestimme die Translation zwischen dem mn- und dem hv-Koordinatensystem
-        m_shift = abs(m_min) + 0.5 + 2              # 0.5 weil das Koordinatensystem in der Mitte steht und 2 wegen dem Rand
+        # Get the translation between the mn and the hv coordinate system
+        # 0.5 because the coordinate system is in the center
+        # and 2 because of the margin
+        m_shift = abs(m_min) + 0.5 + 2
         n_shift = n_max + 0.5 + 2
 
-        # Bestimme die Verschiebung zwischen den Koordinatensystemen h-v und m-n
+        # Get the displacement between the coordinate systems h-v and m-n
         center_shift_vertikal = int(n_shift * self.size_image_px)
         center_shift_horizontal = int(m_shift * self.size_image_px)
 
         return size_image_vertikal, size_image_horizontal, center_shift_vertikal, center_shift_horizontal
-
 
     def select_chunk(self, position_list, total_degree_list):
         """
@@ -158,7 +197,6 @@ class Road:
         (m, n) = position_list[len(position_list)-1]
         degree = total_degree_list[len(position_list)-1]
         elements = []
-        probability = []
 
         # Wenn das Ende des aktuelle chunks in positive n-Achsenrichtung zeigt, prüfe Folgendes:
         if degree == 0:
@@ -228,7 +266,6 @@ class Road:
         degree = json_object['degree']
         self.degree_list.append(degree)
 
-
     def mn2coords(self, position_list, center_shift_vertikal, center_shift_horizontal):
         """
         Schritt 4
@@ -253,7 +290,6 @@ class Road:
             coords_list.append([int(v_1), int(v_2), int(h_1), int(h_2)])
 
         return coords_list
-
 
     def get_drive_points(self, center_shift_vertikal, center_shift_horizontal):
         """
@@ -280,7 +316,6 @@ class Road:
         angles = np.linspace(0, json_def["degree"] / 180  * np.pi, len(drive_points))
 
         return drive_point_coords_list, angles
-
 
     def insert_chunk(self, coords_list, total_degree_list, size_image_vertikal, size_image_horizontal, interrupted_lines):
         """
@@ -317,7 +352,6 @@ class Road:
 
         return full_image_nice, full_image_segment
 
-
     def road_debugging(self, full_image_nice, full_image_segment):     
         """
         Diese Funktion stellt die Hintergrundbilder und ein paar nützliche Infos dar.
@@ -331,7 +365,6 @@ class Road:
         
         cv.waitKey(0)   
         cv.destroyAllWindows()  
-
 
     def build_road(self):
         """
