@@ -1,5 +1,6 @@
 """
 Augmentation of real world images with start lines.
+
 This GUI allows to transform real world camera images in bird's-eye-view
 and add a start line inside it. After the adding of the startline, the image
 will be transformed back into camera perspective.
@@ -15,8 +16,7 @@ from manual_augment import ManualAugment
 
 class Startline(ManualAugment):
     """
-    This class is made for the augmentation of real world images with start
-    line images.
+    Augmentation of real world images with start line images.
 
     Attributes
     ----------
@@ -30,9 +30,7 @@ class Startline(ManualAugment):
     """
 
     def __init__(self):
-        """
-        Define class attributes.
-        """
+        """Define class attributes."""
         super().__init__()
         with open('config1.json', 'r') as f:
             config = json.load(f)
@@ -58,7 +56,6 @@ class Startline(ManualAugment):
         start_line_mask : int array
             Annotation of the start line
         """
-
         white_patch = np.random.randint(150, 255,
                                         (self.patch_size, self.patch_size))
         start_line_image = np.random.randint(0, 10, (
@@ -273,4 +270,3 @@ if __name__ == "__main__":
             if key == 27:
                 exit()
         index += 1
-
