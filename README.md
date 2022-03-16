@@ -124,8 +124,8 @@ https://user-images.githubusercontent.com/88937076/157739977-2eee7219-2c1b-4ba0-
 
 This repository offers an interactive GUI for manual augmentation.
 
-The class 'ManualAugment' in the file 'manual_augment.py' contains generic functions for manually adding overlays to annotated samples.
-The program 'startline.py' shows an example of the manual augmentation. Here a start line will be added to the image and annotation of the data sample.
+The class `ManualAugment` in the file `manual_augment.py` contains generic functions for manually adding overlays to annotated samples.
+The program `startline.py` shows an example of the manual augmentation. Here a start line will be added to the image and annotation of the data sample.
 A interactive GUI is offered to the user where he can translate and rotate the overlay inside the image.
 When the overlay has reached the final pose, the user can save the image. The overlay will be automatically added to the image and annotation.
 
@@ -150,4 +150,4 @@ The start line can be moved using the following controls:
 | ESC   | quit | 
 
 Keep in mind that the input and output paths for the images have to match.
-The paths are set in the configuration file 'config1.json'.
+The paths are set in the configuration file `config1.json`.
