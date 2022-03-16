@@ -23,8 +23,9 @@ from numpy.linalg import inv
 
 class ManualAugment:
     """
-    This class is a template for the manual augmentation of real world images
-    with overlaying images. This GUI allows to transform real world camera
+    Template for the manual augmentation of real world images.
+
+    This GUI allows to transform real world camera
     images in bird's-eye-view and add a overlay inside it. After the adding
     of the overlay, the image will be transformed back into camera perspective.
 
@@ -51,9 +52,7 @@ class ManualAugment:
     """
 
     def __init__(self):
-        """
-        Define class attributes.
-        """
+        """Define class attributes."""
         f = open('config1.json', 'r')
         aug_config = json.load(f)["augmentation_config"]
         self.translation_step = aug_config["translation_step"]
@@ -149,7 +148,6 @@ class ManualAugment:
         mask : int array
             Annotation of the object inside a black background
         """
-
         img = np.zeros((3000, 3000))
         mask = np.zeros((3000, 3000))
 
