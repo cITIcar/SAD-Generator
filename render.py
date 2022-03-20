@@ -10,7 +10,8 @@ class Renderer:
 
     Attributes
     ----------
-    config
+    config : Config
+        The current configuration.
     angle_x : float
         The angle around the x axis.
     angle_y : float
