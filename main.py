@@ -121,37 +121,6 @@ def generate_augmented(config, splitname, output_idcs):
         annotations_input_path, images_input_path,
         annotations_base_path, images_base_path, output_idcs, config)
 
-def init_paths(config):
-    """
-    
-
-    Parameters
-    ----------
-    config : TYPE
-        DESCRIPTION.
-
-    Returns
-    -------
-    None.
-
-    """
-    output_path_annotations = config["paths"]["annotations_output_path"]
-    output_path_images = config["paths"]["images_output_path"]
-
-    os.makedirs(output_path_annotations.format(splitname="train_split"),
-                exist_ok=True)
-    os.makedirs(output_path_annotations.format(splitname="validation_split"),
-                exist_ok=True)
-    os.makedirs(output_path_annotations.format(splitname="test_split"),
-                exist_ok=True)
-
-    os.makedirs(output_path_images.format(splitname="train_split"),
-                exist_ok=True)
-    os.makedirs(output_path_images.format(splitname="validation_split"),
-                exist_ok=True)
-    os.makedirs(output_path_images.format(splitname="test_split"),
-                exist_ok=True)
-
 
 if __name__ == "__main__":
     args = parser.parse_args()
