@@ -6,20 +6,27 @@ import cv2
 
 
 class Renderer:
-    """
-    
+    """This class is used to generate Synthetic images from the cameras perspective.
 
     Attributes
     ----------
     config
-    angle_x
-    angle_y
-    angle_z
-    position_x
-    position_y
-    position_z
-    render_objects
-    horizon_fraction
+    angle_x : float
+        The angle around the x axis.
+    angle_y : float
+        The angle around the y axis.
+    angle_z : float
+        The angle around the z axis.
+    position_x : int
+        The camera position on the x axis.
+    position_y : int
+        The camera position on the y axis.
+    position_z : int
+        The camera position on the z axis.
+    render_objects : Disturbance
+        A list of Disturbances that are to be added.
+    horizon_fraction : float
+        The fraction of the image height, where the horizon line is.
     """
 
     def __init__(self, config):
@@ -39,18 +46,17 @@ class Renderer:
                                  self.config["output_size"][1])
 
     def project_point(self, coord):
-        """
-
+        """Projects a single 3D point into the current camera perspective.
 
         Parameters
         ----------
-        coord : TYPE
-            DESCRIPTION.
+        coord : np.ndarray
+            A 3D position with x, y, z.
 
         Returns
         -------
-        coord_2d : TYPE
-            DESCRIPTION.
+        coord_2d : np.ndarray
+            The position of coord in the camera's perspective.
 
         """
         x, y, z = coord
@@ -63,15 +69,14 @@ class Renderer:
         return coord_2d
 
     def update_position(self, position, angle):
-        """
-        
+        """Updates the position and yaw angle of the camera.
 
         Parameters
         ----------
-        position : TYPE
-            DESCRIPTION.
-        angle : TYPE
-            DESCRIPTION.
+        position : list[int]
+            The x and y position of the camera.
+        angle : float
+            The yaw angle of the camera.
 
         Returns
         -------
@@ -119,17 +124,16 @@ class Renderer:
 
     def update_ground_plane(self, image_real, image_segmentation,
                             render_objects):
-        """
-        
+        """Updates the current scene.
 
         Parameters
         ----------
-        image_real : TYPE
-            DESCRIPTION.
-        image_segmentation : TYPE
-            DESCRIPTION.
-        render_objects : TYPE
-            DESCRIPTION.
+        image_real : np.ndarray
+            Birds-eye-view of the ground.
+        image_segmentation : np.ndarray
+            Birds-eye-view of the segmentation map.
+        render_objects : List[Disturbance]
+            A list of the disturbances that are to be rendererd.
 
         Returns
         -------
@@ -150,8 +154,7 @@ class Renderer:
         self.render_objects.sort(key=lambda obj: obj.ordering)
 
     def render_images(self):
-        """
-        
+        """Render the ground plane and all disturbances from the current camera perspective.
 
         Parameters
         ----------
@@ -159,10 +162,10 @@ class Renderer:
 
         Returns
         -------
-        perspective_camera : TYPE
-            DESCRIPTION.
+        perspective_camera : np.ndarray
+            The normal output image.
         perspective_segmentation : TYPE
-            DESCRIPTION.
+            The image's segmentation map.
 
         """
         width, height = self.config["output_size"]
