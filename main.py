@@ -1,5 +1,5 @@
-"""Commands for creating augmented and synthetic data."""
 # !/usr/bin/env python3
+"""Commands for creating augmented and synthetic data."""
 
 import os
 import time
@@ -24,17 +24,16 @@ parser.add_argument(
     help="display the video stream instead of saving the images")
 
 def generate_synthetic(config, splitname, output_idcs):
-    """
-    
+    """Create the synthetic fraction of the split defined in config.
 
     Parameters
     ----------
-    config : TYPE
-        DESCRIPTION.
-    splitname : TYPE
-        DESCRIPTION.
-    output_idcs : TYPE
-        DESCRIPTION.
+    config : Config
+        The configuration.
+    splitname : str
+        The name of the split.
+    output_idcs : List[int]
+        The list of indices for which images need to be created
 
     Returns
     -------
@@ -93,17 +92,16 @@ def generate_synthetic(config, splitname, output_idcs):
               " fps, {idx + 1}/{len(output_idcs)}")
 
 def generate_augmented(config, splitname, output_idcs):
-    """
-    
+    """Create the augmented fraction of the split defined in config.
 
     Parameters
     ----------
-    config : TYPE
-        DESCRIPTION.
-    splitname : TYPE
-        DESCRIPTION.
-    output_idcs : TYPE
-        DESCRIPTION.
+    config : Config
+        The configuration.
+    splitname : str
+        The name of the split.
+    output_idcs : List[int]
+        The list of indices for which images need to be created
 
     Returns
     -------
@@ -122,37 +120,6 @@ def generate_augmented(config, splitname, output_idcs):
     augment.augment_dataset(
         annotations_input_path, images_input_path,
         annotations_base_path, images_base_path, output_idcs, config)
-
-def init_paths(config):
-    """
-    
-
-    Parameters
-    ----------
-    config : TYPE
-        DESCRIPTION.
-
-    Returns
-    -------
-    None.
-
-    """
-    output_path_annotations = config["paths"]["annotations_output_path"]
-    output_path_images = config["paths"]["images_output_path"]
-
-    os.makedirs(output_path_annotations.format(splitname="train_split"),
-                exist_ok=True)
-    os.makedirs(output_path_annotations.format(splitname="validation_split"),
-                exist_ok=True)
-    os.makedirs(output_path_annotations.format(splitname="test_split"),
-                exist_ok=True)
-
-    os.makedirs(output_path_images.format(splitname="train_split"),
-                exist_ok=True)
-    os.makedirs(output_path_images.format(splitname="validation_split"),
-                exist_ok=True)
-    os.makedirs(output_path_images.format(splitname="test_split"),
-                exist_ok=True)
 
 
 if __name__ == "__main__":
