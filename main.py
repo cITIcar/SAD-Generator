@@ -90,7 +90,7 @@ def generate_synthetic(config, splitname, output_idcs):
             idx += 1
 
         print(f"\033[1A\033[K{p_idx / (time.time() - t1):.5}" +
-              " fps, {idx + 1}/{len(output_idcs)}")
+              f" fps, {idx + 1}/{len(output_idcs)}")
 
 def generate_augmented(config, splitname, output_idcs):
     """

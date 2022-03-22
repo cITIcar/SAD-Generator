@@ -71,8 +71,8 @@ def add_overlay(image):
     image : Array
         Image with overlay added to it.
     """
-    number = random.randint(1, 85)
-    overlay = cv2.imread(f"overlays/overlay ({number}).png",
+    overlay_path = random.choice(glob.glob(f"overlays/overlay*.png"))
+    overlay = cv2.imread(overlay_path,
                          cv2.IMREAD_UNCHANGED)
 
     height = random.randint(10, 30)
@@ -125,8 +125,8 @@ def add_obstacle(image, mask, config):
     """
     row, col = image.shape
 
-    number = random.randint(1, 34)
-    obstacle = cv2.imread(f"obstacles/box_{number}.jpg",
+    obstacle_path = random.choice(glob.glob(f"obstacles/box_*.jpg"))
+    obstacle = cv2.imread(obstacle_path,
                           cv2.IMREAD_GRAYSCALE)
 
     height = random.randint(20, 40)

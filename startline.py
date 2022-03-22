@@ -6,6 +6,8 @@ and add a start line inside it. After the adding of the startline, the image
 will be transformed back into camera perspective.
 """
 
+import os
+import sys
 import numpy as np
 import cv2
 import json
@@ -29,9 +31,9 @@ class Startline(ManualAugment):
         single square.
     """
 
-    def __init__(self):
+    def __init__(self, config_path="config1.json"):
         """Define class attributes."""
-        super().__init__()
+        super().__init__(config_path)
         with open('config1.json', 'r') as f:
             config = json.load(f)
 
@@ -227,20 +229,27 @@ class Startline(ManualAugment):
 
 
 if __name__ == "__main__":
-    startline = Startline()
+    if len(sys.argv) > 1:
+        startline = Startline(sys.argv[1])
+    else:
+        startline = Startline()
+
     index = 0
 
     startline_img, startline_mask = startline.draw_startline()
 
-    annotations_list = glob.glob("./real_dataset/annotations/set_*/*.png")
+    annotations_list = glob.glob(startline.mask_input_path + "/*.png") if os.path.isdir(startline.mask_input_path) else glob.glob(startline.mask_input_path)
+    images_list = glob.glob(startline.img_input_path + "/*.png") if os.path.isdir(startline.img_input_path) else glob.glob(startline.img_input_path)
 
     startline_img_, startline_mask_ = startline.create_overlay(startline_img)
 
     if len(annotations_list) == 0:
-        print("no annotated images found under the path")
+        print(f"no annotated images found under {self.mask_input_path}")
 
-    for mask_path in annotations_list:
-        img_path = mask_path.replace("annotations", "images")
+    if len(images_list) == 0:
+        print(f"no images found under {self.img_input_path}")
+
+    for mask_path, img_path in zip(annotations_list, images_list):
         camera_img, camera_mask = startline.import_annotated_data(
                 img_path, mask_path)
         bird_img, bird_mask = startline.get_birds_eye_view(
