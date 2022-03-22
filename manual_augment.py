@@ -23,8 +23,9 @@ from numpy.linalg import inv
 
 class ManualAugment:
     """
-    This class is a template for the manual augmentation of real world images
-    with overlaying images. This GUI allows to transform real world camera
+    Template for the manual augmentation of real world images.
+
+    This GUI allows to transform real world camera
     images in bird's-eye-view and add a overlay inside it. After the adding
     of the overlay, the image will be transformed back into camera perspective.
 
@@ -50,11 +51,10 @@ class ManualAugment:
         How pixels will be interpolated in resize and warping operations
     """
 
-    def __init__(self):
-        """
-        Define class attributes.
-        """
-        f = open('config1.json', 'r')
+    def __init__(self, config_path):
+        """Define class attributes."""
+        f = open(config_path, "r")
+        render_config = config.Config(config_path, debug=False)
         aug_config = json.load(f)["augmentation_config"]
         self.translation_step = aug_config["translation_step"]
         self.rotation_step = aug_config["rotation_step"]
@@ -63,20 +63,21 @@ class ManualAugment:
         self.offset_y = aug_config["offset_y"]
         self.mask_write_path = aug_config["mask_write_path"]
         self.img_write_path = aug_config["img_write_path"]
+        self.mask_input_path = aug_config["mask_input_path"]
+        self.img_input_path = aug_config["img_input_path"]
         self.img_overlay_path = aug_config["img_object_path"]
         self.mask_overlay_path = aug_config["mask_object_path"]
-        self.camera_x_size = aug_config["camera_x_size"]
-        self.camera_y_size = aug_config["camera_y_size"]
+        self.camera_x_size = render_config["output_size"][0]
+        self.camera_y_size = render_config["output_size"][1]
         self.overlay_mask_value = aug_config["overlay_mask_value"]
         self.annotation_buffer = aug_config["annotation_buffer"]
 
         # Define render object for perspective transform
-        render_config = config.Config("config1.json", debug=False)
-        fov_camera = aug_config["fov_camera"]*math.pi/180
+        camera_yaw = math.pi
         position_camera = (aug_config["position_camera_x"],
                            aug_config["position_camera_y"])
         self.renderer = render.Renderer(render_config)
-        self.renderer.update_position(position_camera, fov_camera)
+        self.renderer.update_position(position_camera, camera_yaw)
         self.interpolation = cv2.INTER_NEAREST
 
     def import_annotated_data(self, img_path, mask_path):
@@ -104,7 +105,7 @@ class ManualAugment:
             print("Image or Annotation not found.")
         if img.shape != mask.shape:
             print("Shape of Image and Annotation is not consistent.")
-        if img.shape != (self.camera_x_size, self.camera_y_size):
+        if img.shape != (self.camera_y_size, self.camera_x_size):
             print("Image size is not consistent with configuration.")
         return img, mask
 
@@ -149,7 +150,6 @@ class ManualAugment:
         mask : int array
             Annotation of the object inside a black background
         """
-
         img = np.zeros((3000, 3000))
         mask = np.zeros((3000, 3000))
 

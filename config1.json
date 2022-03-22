@@ -1,9 +1,9 @@
 {
     "fov": 90,
-    "camera_height": 25.5,
-    "camera_angle": -5,
-    "output_size": [128, 64],
-    "rescale": 8,
+    "camera_height": 31,
+    "camera_angle": -21,
+    "output_size": [640, 480],
+    "rescale": 3,
     "chunk_size_cm": 250,
     "chunk_size_px": 1000,
     "shuffle": true,
@@ -12,11 +12,11 @@
     "obstacle_class": 200,
 
     "paths": {
-        "annotations_output_path": "data/annotations/{splitname}",
-        "images_output_path": "data/images/{splitname}",
-        "manual_annotations_input_path": "real_dataset/annotations/set_*",
-        "manual_images_input_path": "real_dataset/images/set_*",
-        "chunk_path": "chunks",
+        "annotations_output_path": "./data/annotations/{splitname}",
+        "images_output_path": "./data/images/{splitname}",
+        "manual_annotations_input_path": "./examples/annotations",
+        "manual_images_input_path": "./examples/images",
+        "chunk_path": "./chunks",
         "chunk_file_pattern": "{chunk_type}_{variant}",
         "output_file_pattern": "image_{idx}.png"
     },
@@ -58,23 +58,18 @@
         "translation_step": 25,
         "scale_step": 25,
         "rotation_step": 10,
-        "img_write_path" : "./augmented_data/images/image_",
-        "mask_write_path" : "./augmented_data/annotations/mask_",
-        "img_object_path" : "img_overlay_path.png",
-        "mask_object_path" : "mask_overlay_path.png",
-        "angle" : 0,
-        "offset_x" : 400,
-        "offset_y" : 1000,
-        "fov_camera" : 180,
-        "position_camera_x" : 1400,
-        "position_camera_y" : 0,
-        "camera_x_size" : 64,
-        "camera_y_size" : 128,
-        "overlay_mask_value" : 250,
-        "annotation_buffer" : 25
-        
-        
-        
+        "img_write_path": "./augmented_data/images/image_",
+        "mask_write_path": "./augmented_data/annotations/mask_",
+        "img_input_path": "./examples/images/",
+        "mask_input_path": "./examples/annotations/",
+        "img_object_path": "img_overlay_path.png",
+        "mask_object_path": "mask_overlay_path.png",
+        "angle": 0,
+        "offset_x": 400,
+        "offset_y": 1000,
+        "position_camera_x": 1400,
+        "position_camera_y": 0,
+        "overlay_mask_value": 250,
+        "annotation_buffer": 25
     }
-
 }
