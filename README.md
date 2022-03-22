@@ -147,7 +147,7 @@ The start line can be moved using the following controls:
 | R   | rotate the start line counter-clockwise | 
 | Q   | skip the image | 
 | Space   | save the image and go to the next | 
-| ESC   | quit | 
+| X   | quit | 
 
 Keep in mind that the input and output paths for the images have to match.
 The paths are set in the configuration file `config1.json`.

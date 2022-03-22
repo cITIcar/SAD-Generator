@@ -3,7 +3,7 @@
     "camera_height": 31,
     "camera_angle": -21,
     "output_size": [640, 480],
-    "rescale": 8,
+    "rescale": 3,
     "chunk_size_cm": 250,
     "chunk_size_px": 1000,
     "shuffle": true,

@@ -105,7 +105,7 @@ class ManualAugment:
             print("Image or Annotation not found.")
         if img.shape != mask.shape:
             print("Shape of Image and Annotation is not consistent.")
-        if img.shape != (self.camera_x_size, self.camera_y_size):
+        if img.shape != (self.camera_y_size, self.camera_x_size):
             print("Image size is not consistent with configuration.")
         return img, mask
 

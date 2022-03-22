@@ -276,6 +276,6 @@ if __name__ == "__main__":
                 break
             if key == ord("q"):
                 break
-            if key == 27:
+            if key == ord("x"):
                 exit()
         index += 1
