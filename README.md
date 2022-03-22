@@ -32,10 +32,6 @@ venv4datagenerator\Scripts\activate.bat
 
 ## Dependencies
 
-- mccabe==0.6.0
-- pycodestyle==2.6.0
-- pyflakes==2.2.0
-- entrypoints==0.4.0
 - opencv-python
 - numpy
 - imutils
