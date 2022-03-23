@@ -23,6 +23,7 @@ parser.add_argument(
     "--debug", action="store_true",
     help="display the video stream instead of saving the images")
 
+
 def generate_synthetic(config, splitname, output_idcs):
     """Create the synthetic fraction of the split defined in config.
 
@@ -91,6 +92,7 @@ def generate_synthetic(config, splitname, output_idcs):
         print(f"\033[1A\033[K{p_idx / (time.time() - t1):.5}" +
               f" fps, {idx + 1}/{len(output_idcs)}")
 
+
 def generate_augmented(config, splitname, output_idcs):
     """Create the augmented fraction of the split defined in config.
 
@@ -115,7 +117,6 @@ def generate_augmented(config, splitname, output_idcs):
         splitname=splitname)
     annotations_base_path = config["paths"]["annotations_output_path"].format(
         splitname=splitname)
-    image_pattern = config["paths"]["output_file_pattern"]
 
     augment.augment_dataset(
         annotations_input_path, images_input_path,

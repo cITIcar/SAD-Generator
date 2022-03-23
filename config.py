@@ -2,11 +2,12 @@ import numpy as np
 import math
 import json
 
+
 class Config:
     """This class contains the configuration.
 
-    For convenience it also adds a few keys, that can be immediately created from the 
-    given configuration file.
+    For convenience it also adds a few keys,that can be immediately created
+    from the given configuration file.
 
     Attributes
     ----------
@@ -26,7 +27,7 @@ class Config:
         self.config = json.load(open(config_file))
 
         self.config["intrinsic_camera_matrix"] = Config.create_intrinsic_from(
-            self.config["fov"], 
+            self.config["fov"],
             [self.config["output_size"][0] * self.config["rescale"],
              self.config["output_size"][1] * self.config["rescale"]])
 
@@ -50,7 +51,7 @@ class Config:
 
         Returns
         -------
-            The item.        
+            The item.
         """
         return self.config[key]
 
