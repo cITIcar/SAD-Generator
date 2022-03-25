@@ -17,11 +17,11 @@ The Camera Options are used to place a virtual camera into the scene.
 
 ### Path Options
 - `images_output_path`: Under this path the augmented and synthetic images will be stored, e.g. `data/images/{splitname}/some_set`. For the creation of separated datasets, the path should contain the variable `{splitname}`, otherwise all splits will be saved in the same folder.
-- `annotations_output_path`: Under this path the generated labels of the augmented and synthetic images will be stored, e.g. `data/annotations/{splitname}/some_set`. A label belongs to a image if they have the same name.
+- `labels_output_path`: Under this path the generated labels of the augmented and synthetic images will be stored, e.g. `data/labels/{splitname}/some_set`. A label belongs to a image if they have the same name.
 - `manual_images_input_path`: This is the path to the images of the manually annotated data.
-- `manual_annotations_input_path`: This is the path to the labels of the manually annotated data. A label belongs to a image if they have the same name.
+- `manual_labels_input_path`: This is the path to the labels of the manually annotated data. A label belongs to a image if they have the same name.
 - `chunk_path`: This is the path to the chunk folder. 
-- `chunk_file_pattern`: This describes how the chunks will be named. Every chunk image in the chunk folder has a unique name with the suffix `.png`. Every chunk label in the chunk folder has a unique name with the suffix `_segment.png`. Two variables need to be defined inside the pattern: The `chunk_type` (e.g. `line`) and the `variant` (There may be multiple variants for one chunk type).
+- `chunk_file_pattern`: This describes how the chunks will be named. Every chunk image in the chunk folder has a unique name with the suffix `.png`. Every chunk label in the chunk folder has a unique name with the suffix `_label.png`. Two variables need to be defined inside the pattern: The `chunk_type` (e.g. `line`) and the `variant` (There may be multiple variants for one chunk type).
 
 ### Dataset Options 
 The config key `splits` which datasets will be outputed from the data generator.  Each `split` contains the total number of images as well as the fraction of which should be fully synthetic or augmented. In this example we defined a train dataset `train_split`, a validation dataset `validation_split` and a test dataset `test_split`.
