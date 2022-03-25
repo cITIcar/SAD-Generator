@@ -52,7 +52,7 @@ def generate_synthetic(config, splitname, output_idcs):
 
     images_base_path = config["paths"]["images_output_path"].format(
         splitname=splitname)
-    annotations_base_path = config["paths"]["annotations_output_path"].format(
+    labels_base_path = config["paths"]["labels_output_path"].format(
         splitname=splitname)
     image_pattern = config["paths"]["output_file_pattern"]
 
@@ -60,29 +60,29 @@ def generate_synthetic(config, splitname, output_idcs):
     running = True
     while running:
         t1 = time.time()
-        (image, image_segment,
+        (image, image_label,
          drive_points, _, camera_angles) = road_generator.build_road()
-        renderer.update_ground_plane(image, image_segment, objects)
+        renderer.update_ground_plane(image, image_label, objects)
 
         for p_idx, (point, angle) in enumerate(zip(drive_points,
                                                    camera_angles)):
             renderer.update_position(point, angle)
-            perspective_nice, perspective_segment = renderer.render_images()
+            perspective_nice, perspective_label = renderer.render_images()
             perspective_nice = np.clip(perspective_nice,
                                        0, 255).astype(np.uint8)
-            perspective_segment = perspective_segment.astype(np.uint8)
+            perspective_label = perspective_label.astype(np.uint8)
 
             if config["debug"]:
                 cv2.imshow(f"nice {splitname}", perspective_nice)
-                cv2.imshow(f"segment {splitname}", perspective_segment)
+                cv2.imshow(f"label {splitname}", perspective_label)
                 cv2.waitKey(1)
             else:
                 cv2.imwrite(images_base_path +
                             "/" + image_pattern.format(idx=output_idcs[idx]),
                             perspective_nice)
-                cv2.imwrite(annotations_base_path +
+                cv2.imwrite(labels_base_path +
                             "/" + image_pattern.format(idx=output_idcs[idx]),
-                            perspective_segment)
+                            perspective_label)
 
             if idx >= len(output_idcs) - 1:
                 running = False
@@ -110,17 +110,17 @@ def generate_augmented(config, splitname, output_idcs):
     None.
 
     """
-    annotations_input_path = config["paths"]["manual_annotations_input_path"]
+    labels_input_path = config["paths"]["manual_labels_input_path"]
     images_input_path = config["paths"]["manual_images_input_path"]
 
     images_base_path = config["paths"]["images_output_path"].format(
         splitname=splitname)
-    annotations_base_path = config["paths"]["annotations_output_path"].format(
+    labels_base_path = config["paths"]["labels_output_path"].format(
         splitname=splitname)
 
     augment.augment_dataset(
-        annotations_input_path, images_input_path,
-        annotations_base_path, images_base_path, output_idcs, config)
+        labels_input_path, images_input_path,
+        labels_base_path, images_base_path, output_idcs, config)
 
 
 if __name__ == "__main__":
@@ -131,11 +131,11 @@ if __name__ == "__main__":
         random.seed(config["seed"])
         np.random.seed(config["seed"])
 
-    output_path_annotations = config["paths"]["annotations_output_path"]
+    output_path_labels = config["paths"]["labels_output_path"]
     output_path_images = config["paths"]["images_output_path"]
 
     for name, split in config["splits"].items():
-        os.makedirs(output_path_annotations.format(splitname=name),
+        os.makedirs(output_path_labels.format(splitname=name),
                     exist_ok=True)
         os.makedirs(output_path_images.format(splitname=name), exist_ok=True)
         print("generating split", name)

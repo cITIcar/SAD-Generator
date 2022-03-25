@@ -42,7 +42,7 @@ class Renderer:
 
         self.render_objects = []
         self.update_position((self.position_x, self.position_y), self.angle_z)
-        horizon_point = self.h_segmentation @ np.array([[0], [1], [0]])
+        horizon_point = self.h_label @ np.array([[0], [1], [0]])
         self.horizon_fraction = ((horizon_point[1] / horizon_point[2]) /
                                  self.config["output_size"][1])
 
@@ -119,11 +119,11 @@ class Renderer:
         self.h_camera = (self.config["intrinsic_camera_matrix"] @
                          self.rotation @ self.translation @
                          self.config["project2d"])
-        self.h_segmentation = (self.config["intrinsic_segmentation_matrix"] @
+        self.h_label = (self.config["intrinsic_label_matrix"] @
                                self.rotation @ self.translation @
                                self.config["project2d"])
 
-    def update_ground_plane(self, image_real, image_segmentation,
+    def update_ground_plane(self, image_real, image_label,
                             render_objects):
         """Updates the current scene.
 
@@ -131,8 +131,8 @@ class Renderer:
         ----------
         image_real : np.ndarray
             Birds-eye-view of the ground.
-        image_segmentation : np.ndarray
-            Birds-eye-view of the segmentation map.
+        image_label : np.ndarray
+            Birds-eye-view of the label map.
         render_objects : List[Disturbance]
             A list of the disturbances that are to be rendererd.
 
@@ -142,7 +142,7 @@ class Renderer:
 
         """
         self.image_real = image_real
-        self.image_segmentation = image_segmentation
+        self.image_label = image_label
         self.render_objects = sorted(render_objects,
                                      key=lambda obj: obj.ordering)
 
@@ -150,12 +150,12 @@ class Renderer:
             if obj.pre_transform_step:
                 obj.pre_transform_step(
                     image=image_real,
-                    image_segment=image_segmentation)
+                    image_segment=image_label)
 
         self.render_objects.sort(key=lambda obj: obj.ordering)
 
     def render_images(self):
-        """Render the ground plane and all disturbances from the current camera perspective.
+        """Render the ground plane and disturbances from camera perspective.
 
         Parameters
         ----------
@@ -165,8 +165,8 @@ class Renderer:
         -------
         perspective_camera : np.ndarray
             The normal output image.
-        perspective_segmentation : TYPE
-            The image's segmentation map.
+        perspective_label : TYPE
+            The image's label map.
 
         """
         width, height = self.config["output_size"]
@@ -174,25 +174,25 @@ class Renderer:
         perspective_camera = cv2.warpPerspective(
             self.image_real, self.h_camera,
             (width * rescale, height * rescale), flags=cv2.INTER_NEAREST)
-        perspective_segmentation = cv2.warpPerspective(
-            self.image_segmentation, self.h_segmentation,
+        perspective_label = cv2.warpPerspective(
+            self.image_label, self.h_label,
             (width, height), flags=cv2.INTER_NEAREST)
 
         perspective_camera[:int(len(perspective_camera) *
                                 self.horizon_fraction)] = 0
-        perspective_segmentation[:int(len(perspective_segmentation) *
-                                      self.horizon_fraction)] = 0
+        perspective_label[:int(len(perspective_label) *
+                               self.horizon_fraction)] = 0
 
         for obj in self.render_objects:
             if obj.post_transform_step:
                 obj.post_transform_step(
                     image=perspective_camera,
-                    image_segment=perspective_segmentation,
+                    image_segment=perspective_label,
                     point=(self.position_x, self.position_y),
                     angle=self.angle_z,
                     global_angle=self.angle_z,
                     bird_to_camera_nice=self.h_camera,
-                    bird_to_camera_segment=self.h_segmentation,
+                    bird_to_camera_segment=self.h_label,
                     renderer=self)
 
         if rescale != 1:
@@ -200,4 +200,4 @@ class Renderer:
                 perspective_camera, (width, height),
                 interpolation=cv2.INTER_AREA)
 
-        return perspective_camera, perspective_segmentation
+        return perspective_camera, perspective_label

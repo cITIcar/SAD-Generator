@@ -71,7 +71,7 @@ def add_overlay(image):
     image : Array
         Image with overlay added to it.
     """
-    overlay_path = random.choice(glob.glob(f"overlays/overlay*.png"))
+    overlay_path = random.choice(glob.glob("overlays/overlay*.png"))
     overlay = cv2.imread(overlay_path,
                          cv2.IMREAD_UNCHANGED)
 
@@ -84,10 +84,10 @@ def add_overlay(image):
 
     alpha_channel = overlay[:, :, 3]
 
-    overlay_mask = alpha_channel * 0
-    overlay_mask[alpha_channel > 150] = 1
+    overlay_label = alpha_channel * 0
+    overlay_label[alpha_channel > 150] = 1
 
-    image_mask = 1 - overlay_mask
+    image_label = 1 - overlay_label
 
     row, col = image.shape
 
@@ -95,15 +95,15 @@ def add_overlay(image):
     y_place = random.randint(0, int(col*0.7) - width)
 
     image[x_place:x_place + height, y_place:y_place + width] = (
-        overlay_mask * overlay_gray + image_mask *
+        overlay_label * overlay_gray + image_label *
         image[x_place:x_place + height, y_place:y_place + width])
 
     return image
 
 
-def add_obstacle(image, mask, config):
+def add_obstacle(image, label, config):
     """
-    Add obstacles to the image and annotation of a sample.
+    Add obstacles to the image and label of a sample.
 
     The obstacle is randomly choosen from the directory 'white_box'.
 
@@ -111,8 +111,8 @@ def add_obstacle(image, mask, config):
     ----------
     image : Array
         Image before adding obstacle.
-    mask : Array
-        Annotation before adding obstacle.
+    label : Array
+        label before adding obstacle.
     config : Dict
         Configuration of datagenerator.
 
@@ -120,12 +120,12 @@ def add_obstacle(image, mask, config):
     -------
     image : Array
         Image with obstacle added to it.
-    mask: Array
-        Annotation with obstacle added to it.
+    label: Array
+        label with obstacle added to it.
     """
     row, col = image.shape
 
-    obstacle_path = random.choice(glob.glob(f"obstacles/box_*.jpg"))
+    obstacle_path = random.choice(glob.glob("obstacles/box_*.jpg"))
     obstacle = cv2.imread(obstacle_path,
                           cv2.IMREAD_GRAYSCALE)
 
@@ -138,22 +138,22 @@ def add_obstacle(image, mask, config):
     x_place = random.randint(0, int(row*0.7) - height)
     y_place = random.randint(0, int(col*0.7) - width)
 
-    overlay_mask = obstacle * 0
-    overlay_mask[obstacle > 100] = 1
-    image_mask = 1 - overlay_mask
+    overlay_label = obstacle * 0
+    overlay_label[obstacle > 100] = 1
+    image_label = 1 - overlay_label
 
     image[x_place:x_place + height, y_place:y_place + width] = (
-        overlay_mask * obstacle + image_mask *
+        overlay_label * obstacle + image_label *
         image[x_place:x_place + height, y_place:y_place + width])
 
-    space = mask[x_place:x_place + height, y_place:y_place + width]
+    space = label[x_place:x_place + height, y_place:y_place + width]
     space[obstacle > 50] = config["obstacle_class"]
-    mask[x_place:x_place + height, y_place:y_place + width] = space
+    label[x_place:x_place + height, y_place:y_place + width] = space
 
-    return image, mask
+    return image, label
 
 
-def augment_dataset(annotations_path, images_path, annotations_output_path,
+def augment_dataset(labels_path, images_path, labels_output_path,
                     images_output_path, idcs, config):
     """
     Augment annotated sample.
@@ -164,12 +164,12 @@ def augment_dataset(annotations_path, images_path, annotations_output_path,
 
     Parameters
     ----------
-    annotations_path : String
-        Path from which annotations of input data will be loaded from.
+    labels_path : String
+        Path from which labels of input data will be loaded from.
     images_path : String
         Path from which images of input data will be loaded from.
-    annotations_output_path : String
-        Path where annotations of augmented data will be lstored.
+    labels_output_path : String
+        Path where labels of augmented data will be lstored.
     images_output_path : String
         Path where images of augmented data will be lstored.
     idcs : int
@@ -181,38 +181,38 @@ def augment_dataset(annotations_path, images_path, annotations_output_path,
     -------
     None.
     """
-    annotations_list = glob.glob(annotations_path + "/*.png")
+    labels_list = glob.glob(labels_path + "/*.png")
     images_list = glob.glob(images_path + "/*.png")
 
-    if len(annotations_list) == 0:
-        print("no annotated png images found under the path", annotations_path)
+    if len(labels_list) == 0:
+        print("no annotated png images found under the path", labels_path)
         return
     if len(images_list) == 0:
-        print("no png images found under the path", annotations_path)
+        print("no png images found under the path", labels_path)
         return
 
     index = 0
 
     while index < len(idcs):
-        for mask_path in annotations_list:
-            image_path = mask_path.replace("annotations", "images")
+        for label_path in labels_list:
+            image_path = label_path.replace("labels", "images")
 
-            mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+            label = cv2.imread(label_path, cv2.IMREAD_GRAYSCALE)
             image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
-            if mask is None or image is None:
+            if label is None or image is None:
                 print("skipping invalid file")
                 continue
 
             if random.choice([True, False]):
-                image, mask = add_obstacle(image, mask, config)
+                image, label = add_obstacle(image, label, config)
             else:
                 image = add_overlay(image)
 
             image = add_noise(image, random.randint(0, 30))
 
-            cv2.imwrite(f"{annotations_output_path}/image_{idcs[index]}.png",
-                        mask)
+            cv2.imwrite(f"{labels_output_path}/image_{idcs[index]}.png",
+                        label)
             cv2.imwrite(f"{images_output_path}/image_{idcs[index]}.png",
                         image)
 

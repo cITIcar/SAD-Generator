@@ -13,7 +13,7 @@ class Road:
     Attributes
     ----------
     images : Dict
-        Data structure to store all images and annotations of chunks.
+        Data structure to store all images and labels of chunks.
     degree_list : List
         List with angle information for each previous chunk.
     size_image_px : int
@@ -48,33 +48,33 @@ class Road:
         -------
         None.
         """
-        for segment_type in ["line", "intersection", "curve_left",
+        for label_type in ["line", "intersection", "curve_left",
                              "curve_right"]:
-            self.images[segment_type] = {"segment": [], "nice": []}
+            self.images[label_type] = {"label": [], "nice": []}
             for variant in sorted(glob.glob(
-                    f"chunks/{segment_type}_segment*.png")):
-                segment = cv.imread(variant, cv.IMREAD_GRAYSCALE)
+                    f"chunks/{label_type}_label*.png")):
+                label = cv.imread(variant, cv.IMREAD_GRAYSCALE)
 
-                self.images[segment_type]["segment"].append({
-                    0: segment.astype(np.float32),
-                    90: cv.rotate(segment, cv.ROTATE_90_COUNTERCLOCKWISE).astype(np.float32),
-                    -180: cv.rotate(segment, cv.ROTATE_180).astype(np.float32),
-                    180: cv.rotate(segment, cv.ROTATE_180).astype(np.float32),
-                    -90: cv.rotate(segment, cv.ROTATE_90_CLOCKWISE).astype(np.float32),
+                self.images[label_type]["label"].append({
+                    0: label.astype(np.float32),
+                    90: cv.rotate(label, cv.ROTATE_90_COUNTERCLOCKWISE).astype(np.float32),
+                    -180: cv.rotate(label, cv.ROTATE_180).astype(np.float32),
+                    180: cv.rotate(label, cv.ROTATE_180).astype(np.float32),
+                    -90: cv.rotate(label, cv.ROTATE_90_CLOCKWISE).astype(np.float32),
                 })
 
-            with open(f"chunks/{segment_type}.json") as f:
-                self.chunk_json[segment_type] = json.load(f)
+            with open(f"chunks/{label_type}.json") as f:
+                self.chunk_json[label_type] = json.load(f)
 
             path_pattern = (
                 self.config["paths"]["chunk_path"] + "/" +
                 self.config["paths"]["chunk_file_pattern"]
-            ).format(chunk_type=segment_type + "_nice", variant="*")
+            ).format(chunk_type=label_type + "_nice", variant="*")
 
             for variant in sorted(glob.glob(path_pattern)):
                 nice = cv.imread(variant, cv.IMREAD_GRAYSCALE)
 
-                self.images[segment_type]["nice"].append({
+                self.images[label_type]["nice"].append({
                     0: nice.astype(np.float32),
                     90: cv.rotate(nice, cv.ROTATE_90_COUNTERCLOCKWISE).astype(np.float32),
                     -180: cv.rotate(nice, cv.ROTATE_180).astype(np.float32),
@@ -355,12 +355,12 @@ class Road:
         -------
         full_image_nice : Array
             Photorealistic image of the background with inserted chunks.
-        full_image_segment : Array
-            Annotation of the background with inserted chunks.
+        full_image_label : Array
+            label of the background with inserted chunks.
         """
         full_image_nice = np.zeros((
             size_image_vertikal, size_image_horizontal), dtype=np.float32)
-        full_image_segment = np.zeros((
+        full_image_label = np.zeros((
             size_image_vertikal, size_image_horizontal), dtype=np.float32)
 
         for i, file in enumerate(self.file_list):
@@ -368,14 +368,14 @@ class Road:
             variant_idx = np.random.randint(0, len(self.images[file]["nice"]))
 
             img_nice = self.images[file]["nice"][variant_idx][angle]
-            img_segment = self.images[file]["segment"][variant_idx][angle]
+            img_label = self.images[file]["label"][variant_idx][angle]
 
             [v_1, v_2, h_1, h_2] = coords_list[i]
 
             full_image_nice[v_1:v_2, h_1:h_2] = img_nice
-            full_image_segment[v_1:v_2, h_1:h_2] = img_segment
+            full_image_label[v_1:v_2, h_1:h_2] = img_label
 
-        return full_image_nice, full_image_segment
+        return full_image_nice, full_image_label
 
     def build_road(self):
         """
@@ -400,8 +400,8 @@ class Road:
         -------
         full_image_nice : Array
             Photorealistic image of the background with inserted chunks.
-        full_image_segment : Array
-            Annotation of the background with inserted chunks.
+        full_image_label : Array
+            label of the background with inserted chunks.
         drive_point_coords_list : List
             Travel points of the car in the hv coordinate system
         coords_list : List
@@ -416,9 +416,9 @@ class Road:
                                      center_shift_horizontal)
         drive_point_coords_list, angles = self.get_drive_points(
             center_shift_vertikal, center_shift_horizontal)
-        full_image_nice, full_image_segment = self.insert_chunk(
+        full_image_nice, full_image_label = self.insert_chunk(
             coords_list, total_degree_list, size_image_vertikal,
             size_image_horizontal, 0)
 
-        return (full_image_nice, full_image_segment,
+        return (full_image_nice, full_image_label,
                 drive_point_coords_list, coords_list, angles)

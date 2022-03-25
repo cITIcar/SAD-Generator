@@ -12,9 +12,9 @@
     "obstacle_class": 200,
 
     "paths": {
-        "annotations_output_path": "./data/annotations/{splitname}",
+        "labels_output_path": "./data/labels/{splitname}",
         "images_output_path": "./data/images/{splitname}",
-        "manual_annotations_input_path": "./examples/annotations",
+        "manual_labels_input_path": "./examples/labels",
         "manual_images_input_path": "./examples/images",
         "chunk_path": "./chunks",
         "chunk_file_pattern": "{chunk_type}_{variant}",
@@ -59,17 +59,17 @@
         "scale_step": 25,
         "rotation_step": 10,
         "img_write_path": "./augmented_data/images/image_",
-        "mask_write_path": "./augmented_data/annotations/mask_",
+        "label_write_path": "./augmented_data/labels/label_",
         "img_input_path": "./examples/images/",
-        "mask_input_path": "./examples/annotations/",
+        "label_input_path": "./examples/labels/",
         "img_object_path": "img_overlay_path.png",
-        "mask_object_path": "mask_overlay_path.png",
+        "label_object_path": "label_overlay_path.png",
         "angle": 0,
         "offset_x": 400,
         "offset_y": 1000,
         "position_camera_x": 1400,
         "position_camera_y": 0,
-        "overlay_mask_value": 250,
-        "annotation_buffer": 25
+        "overlay_label_value": 250,
+        "label_buffer": 25
     }
 }
