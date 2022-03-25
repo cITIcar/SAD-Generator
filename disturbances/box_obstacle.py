@@ -11,7 +11,7 @@ class BoxObstacle(disturbance.Disturbance):
         self.min_size = min_size
         self.max_size = max_size
         self.colors = colors
-        self.segment_color = config["obstacle_class"]
+        self.label_color = config["obstacle_class"]
         self.rescale = config["rescale"] if config else 1
         self.blur = config["output_size"][0] // 50
         if self.blur % 2 == 0:
@@ -97,20 +97,20 @@ class BoxObstacle(disturbance.Disturbance):
         self.ordering = self.ground[2][1]
 
 
-    def post_transform_step(self, image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer, **kwargs):
+    def post_transform_step(self, image, image_label, point, angle, bird_to_camera_nice, bird_to_camera_label, renderer, **kwargs):
         diff = self.points[:,:2] - np.repeat([np.array(point)], 8, axis=0)
         rot = np.array([[np.cos(angle), np.sin(angle)], [-np.sin(angle), np.cos(angle)]])
 
         if not np.all((diff @ rot)[:,1] < 0):
             return
 
-        reflection = self.create_reflection(image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer)
+        reflection = self.create_reflection(image, image_label, point, angle, bird_to_camera_nice, bird_to_camera_label, renderer)
         image += cv2.resize(reflection, image.shape[::-1], interpolation=cv2.INTER_NEAREST)
-        self.create_obstacle(image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer)
+        self.create_obstacle(image, image_label, point, angle, bird_to_camera_nice, bird_to_camera_label, renderer)
 
 
-    def create_reflection(self, image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer):
-        empty = np.zeros(image_segment.shape)
+    def create_reflection(self, image, image_label, point, angle, bird_to_camera_nice, bird_to_camera_label, renderer):
+        empty = np.zeros(image_label.shape)
 
         self.surfaces_reflection.sort(key=lambda surface: -np.linalg.norm(np.average(surface, axis=0) - np.array([*point, self.camera_height_px])))
 
@@ -125,7 +125,7 @@ class BoxObstacle(disturbance.Disturbance):
         return empty
 
 
-    def create_obstacle(self, image, image_segment, point, angle, bird_to_camera_nice, bird_to_camera_segment, renderer):
+    def create_obstacle(self, image, image_label, point, angle, bird_to_camera_nice, bird_to_camera_label, renderer):
         self.surfaces.sort(key=lambda surface: -np.linalg.norm(np.average(surface, axis=0) - np.array([*point, self.camera_height_px])))
 
         for surface, color in zip(self.surfaces, self.colors):
@@ -134,5 +134,5 @@ class BoxObstacle(disturbance.Disturbance):
                 surface)))
 
             cv2.fillPoly(image, [points_2d.astype(int)], color)
-            cv2.fillPoly(image_segment, [(points_2d / self.rescale).astype(int)], self.segment_color)
+            cv2.fillPoly(image_label, [(points_2d / self.rescale).astype(int)], self.label_color)
 
