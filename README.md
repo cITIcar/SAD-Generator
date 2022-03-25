@@ -36,6 +36,7 @@ venv4datagenerator\Scripts\activate.bat
 - numpy
 - imutils
 - jupyterlab
+- matplotlib
 
 Run
 ```
