@@ -46,7 +46,15 @@ to install dependencies.
 
 ## Running
 
-Use
+We recommend to try our jupyter notebook.
+Start jupyter with:
+
+```bash
+jupyter notebook
+```
+Then open the file with the ending `.ipynb`
+
+Otherwise use
 ```bash
 python main.py --config config1.json
 ```
