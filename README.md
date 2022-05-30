@@ -13,7 +13,7 @@ This data generator gives a simple and fast approach to create artificial datase
 
 If our code helped you, please consider citing our paper:  
 - [1] Pau Dietz Romero, Merlin David Mengel, Jakob Czekansky  
-  [Synthesizing large, low cost and diverse datasets for robust semantic segmentation in self-driving tasks]()
+  [Synthesizing large, low cost and diverse datasets for robust semantic segmentation in self-driving tasks](http://dx.doi.org/10.25819/ubsi/10111)
 
 
 ## Creating a virtual environment
