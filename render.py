@@ -119,7 +119,7 @@ class Renderer:
         self.h_camera = (self.config["intrinsic_camera_matrix"] @
                          self.rotation @ self.translation @
                          self.config["project2d"])
-        self.h_label = (self.config["intrinsic_label_matrix"] @
+        self.h_label = (self.config["intrinsic_segmentation_matrix"] @
                                self.rotation @ self.translation @
                                self.config["project2d"])
 
@@ -187,12 +187,12 @@ class Renderer:
             if obj.post_transform_step:
                 obj.post_transform_step(
                     image=perspective_camera,
-                    image_segment=perspective_label,
+                    image_label=perspective_label,
                     point=(self.position_x, self.position_y),
                     angle=self.angle_z,
                     global_angle=self.angle_z,
                     bird_to_camera_nice=self.h_camera,
-                    bird_to_camera_segment=self.h_label,
+                    bird_to_camera_label=self.h_label,
                     renderer=self)
 
         if rescale != 1:

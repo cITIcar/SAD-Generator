@@ -48,11 +48,10 @@ class Road:
         -------
         None.
         """
-        for label_type in ["line", "intersection", "curve_left",
-                             "curve_right"]:
+        for label_type in ["line", "intersection", "curve_left", "curve_right"]:
             self.images[label_type] = {"label": [], "nice": []}
             for variant in sorted(glob.glob(
-                    f"chunks/{label_type}_label*.png")):
+                    f"chunks/{label_type}_segment*.png")):
                 label = cv.imread(variant, cv.IMREAD_GRAYSCALE)
 
                 self.images[label_type]["label"].append({
